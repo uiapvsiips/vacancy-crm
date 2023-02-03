@@ -1,8 +1,69 @@
 from flask import Flask, request
 
 app = Flask(__name__)
+app.run()
+list_of_vacancies = [
+    {
+     "id": 1,
+     "creation_date": "20.01.2023", "status": 1,
+     "company": "Some company2",
+     "contacts_ids": [5,6],
+     "description": "Vacancy description",
+     "position_name": "Middle Python dev",
+     "comment": "Good vacancy and company",
+     "user_id": 1
+     },
+     {
+     "id": 2,
+     "creation_date": "28.01.2023", "status": 1,
+     "company": "Some company3",
+     "contacts_ids": [5,6],
+     "description": "Vacancy description",
+     "position_name": "Middle Python dev",
+     "comment": "Good vacancy, bad company",
+     "user_id": 1
+     },
+     {
+     "id": 3,
+     "creation_date": "23.01.2023", "status": 1,
+     "company": "Some company4",
+     "contacts_ids": [5,6],
+     "description": "Vacancy description",
+     "position_name": "Trainee Python dev",
+     "comment": "Bad vacancy and company",
+     "user_id": 1
+     }
+]
 
-
+list_of_events = [
+    {
+    "id":1,
+    "vacancy_id": 1,
+    "description": "Some description",
+    "event_date": "01.01.2023",
+    "title": "Event title vacancy 3",
+    "due_to_date": "01.02.2023",
+    "status": 1
+    },
+    {
+    "id":2,
+    "vacancy_id": 2,
+    "description": "Some description",
+    "event_date": "29.01.2023",
+    "title": "Event title vacancy 3",
+    "due_to_date": "03.02.2023",
+    "status": 1
+    },
+    {
+    "id":3,
+    "vacancy_id": 2,
+    "description": "Some description",
+    "event_date": "30.01.2023",
+    "title": "Event title vacancy 3",
+    "due_to_date": "05.02.2023",
+    "status": 1
+    },
+]
 @app.route('/', methods=['GET'])
 @app.route('/user/', methods=['GET'])
 def main_page():
@@ -51,6 +112,7 @@ def post_new_user_vacancies():
 
 @app.get('/vacancy/<int:vacancy_id>/')
 def get_user_vacancy_by_id(vacancy_id=None):
+
     return f"Get your vacancie {vacancy_id}!"
 
 
