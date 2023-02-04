@@ -33,7 +33,6 @@ list_of_vacancies = [
         "user_id": 1
     }
 ]
-
 list_of_events = [
     {
         "id": 1,
@@ -112,33 +111,33 @@ def post_new_user_vacancies():
 
 
 @app.get('/vacancy/<int:vacancy_id>/')
-def get_user_vacancy_by_id(vacancy_id=None):
+def get_user_vacancy_by_id(vacancy_id):
     return next((vacancy for vacancy in list_of_vacancies if vacancy['id'] == vacancy_id),
                 f'No vacancies with vacancy_id: {vacancy_id}')
 
 
 @app.put('/vacancy/<int:vacancy_id>/')
-def update_some_vacancy(vacancy_id=None):
+def update_some_vacancy(vacancy_id):
     return f"Update your vacancie {vacancy_id}!"
 
 
 @app.get('/vacancy/<int:vacancy_id>/events/')
 def get_user_events(vacancy_id=None):
-    return list((event for event in list_of_events if event['vacancy_id'] == vacancy_id))
+    return [event for event in list_of_events if event['vacancy_id'] == vacancy_id]
 
 
 @app.post('/vacancy/<int:vacancy_id>/events/')
-def post_new_event_for_vacancy(vacancy_id=None):
+def post_new_event_for_vacancy(vacancy_id):
     return f"Post new event for vacancy {vacancy_id}!"
 
 
 @app.get('/vacancy/<int:vacancy_id>/events/<event_id>/')
-def get_event_for_vacancy_by_id(vacancy_id=None, event_id=None):
+def get_event_for_vacancy_by_id(vacancy_id, event_id):
     return next(
-        (event for event in list_of_events if event['id'] == int(event_id) and event['vacancy_id'] == vacancy_id),
+        (event for event in list_of_events if event['id'] == int(event_id)),
         f'No events with event_id: {event_id}')
 
 
 @app.put('/vacancy/<int:id>/events/<int:event_id>/')
-def update_some_event_for_vacancy(vacancy_id=None, event_id=None):
+def update_some_event_for_vacancy(vacancy_id, event_id):
     return f"Update event {event_id} for vacancy {vacancy_id}!"
