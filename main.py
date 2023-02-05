@@ -4,7 +4,8 @@ from db_processing import select_info, insert_info
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
-
+#TODO delete user_id variable after doing user authorization
+user_id=1
 
 @app.route('/', methods=['GET'])
 @app.route('/user/', methods=['GET'])
@@ -44,8 +45,6 @@ def get_user_vacancies_history():
 
 @app.get('/vacancy/')
 def get_user_vacancies():
-    #TODO delete user_id variable after doing user authorization
-    user_id=1
     result = select_info('vacancy', conditions=f'user_id={user_id}')
     return render_template('vacancy_add.html', vacancies=result)
 
@@ -59,7 +58,7 @@ def post_new_user_vacancies():
         insert_info('vacancy', request.form)
         flash('Дані про вакансію успішно додано', 'OK')
     return render_template('vacancy_add.html',
-                           vacancies=select_info('vacancy'))
+                           vacancies=select_info('vacancy', conditions=f'user_id={user_id}'))
 
 
 @app.get('/vacancy/<int:vacancy_id>/')
