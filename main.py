@@ -45,20 +45,21 @@ def get_user_vacancies_history():
 
 @app.get('/vacancy/')
 def get_user_vacancies():
-    result = select_info('vacancy', conditions=f'user_id={user_id}')
-    return render_template('vacancy_add.html', vacancies=result)
+    vacancies = select_info('vacancy', conditions=f'user_id={user_id}')
+    return render_template('vacancy_add.html', vacancies=vacancies)
 
 
 @app.post('/vacancy/')
 def post_new_user_vacancies():
     form = request.form
+    vacancies=select_info('vacancy', conditions=f'user_id={user_id}')
     if not form['company'] or not form['contacts_ids'] or not form['description'] or not form['pocition_name']:
         flash('Виникла помилка. Всі поля позначені * повинні бути заповнені!', 'error')
     else:
         insert_info('vacancy', request.form)
         flash('Дані про вакансію успішно додано', 'OK')
     return render_template('vacancy_add.html',
-                           vacancies=select_info('vacancy', conditions=f'user_id={user_id}'))
+                           vacancies=vacancies)
 
 
 @app.get('/vacancy/<int:vacancy_id>/')
@@ -82,6 +83,8 @@ def get_user_events(vacancy_id):
 @app.post('/vacancy/<int:vacancy_id>/events/')
 def post_new_event_for_vacancy(vacancy_id):
     form = dict(request.form)
+    events = select_info('event', conditions=f'vacancy_id={vacancy_id}')
+    vacancy = select_info('vacancy', conditions=f'id={vacancy_id}')[0]
     if not form['title'] or not form['description'] or not form['due_to_date']:
         flash('Виникла помилка. Всі поля позначені * повинні бути заповнені!', 'error')
     else:
@@ -89,8 +92,8 @@ def post_new_event_for_vacancy(vacancy_id):
         insert_info('event', form)
         flash('Інформація успішно додана', 'OK')
     return render_template('events_page.html',
-                           events=select_info('event', conditions=f'vacancy_id={vacancy_id}'),
-                           vacancy=select_info('vacancy', conditions=f'id={vacancy_id}')[0])
+                           events=events,
+                           vacancy=vacancy)
 
 
 @app.get('/vacancy/<int:vacancy_id>/events/<event_id>/')
