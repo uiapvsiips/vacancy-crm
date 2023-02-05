@@ -1,67 +1,9 @@
-from flask import Flask
+from flask import Flask, request, flash, render_template
+
+from db_processing import select_info, insert_info
 
 app = Flask(__name__)
-list_of_vacancies = [
-    {
-        "id": 1,
-        "creation_date": "20.01.2023", "status": 1,
-        "company": "Some company2",
-        "contacts_ids": [5, 6],
-        "description": "Vacancy description",
-        "position_name": "Middle Python dev",
-        "comment": "Good vacancy and company",
-        "user_id": 1
-    },
-    {
-        "id": 2,
-        "creation_date": "28.01.2023", "status": 1,
-        "company": "Some company3",
-        "contacts_ids": [5, 6],
-        "description": "Vacancy description",
-        "position_name": "Middle Python dev",
-        "comment": "Good vacancy, bad company",
-        "user_id": 1
-    },
-    {
-        "id": 3,
-        "creation_date": "23.01.2023", "status": 1,
-        "company": "Some company4",
-        "contacts_ids": [5, 6],
-        "description": "Vacancy description",
-        "position_name": "Trainee Python dev",
-        "comment": "Bad vacancy and company",
-        "user_id": 1
-    }
-]
-list_of_events = [
-    {
-        "id": 1,
-        "vacancy_id": 1,
-        "description": "Some description",
-        "event_date": "01.01.2023",
-        "title": "Event title vacancy 3",
-        "due_to_date": "01.02.2023",
-        "status": 1
-    },
-    {
-        "id": 2,
-        "vacancy_id": 2,
-        "description": "Some description",
-        "event_date": "29.01.2023",
-        "title": "Event title vacancy 3",
-        "due_to_date": "03.02.2023",
-        "status": 1
-    },
-    {
-        "id": 3,
-        "vacancy_id": 2,
-        "description": "Some description",
-        "event_date": "30.01.2023",
-        "title": "Event title vacancy 3",
-        "due_to_date": "05.02.2023",
-        "status": 1
-    },
-]
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 
 @app.route('/', methods=['GET'])
@@ -102,18 +44,27 @@ def get_user_vacancies_history():
 
 @app.get('/vacancy/')
 def get_user_vacancies():
-    return list_of_vacancies
+    result = select_info('vacancy')
+    return render_template('vacancy_add.html', vacancies=result)
+    # return list_of_vacancies
 
 
 @app.post('/vacancy/')
 def post_new_user_vacancies():
-    return "Post new vacancy!"
+    form = request.form
+    if not form['company'] or not form['contacts_ids'] or not form['description'] or not form['pocition_name']:
+        flash('Виникла помилка. Всі поля позначені * повинні бути заповнені!', 'error')
+    else:
+        insert_info('vacancy', request.form)
+        flash('Дані про вакансію успішно додано', 'OK')
+    return render_template('vacancy_add.html',
+                           vacancies=select_info('vacancy'))
 
 
 @app.get('/vacancy/<int:vacancy_id>/')
 def get_user_vacancy_by_id(vacancy_id):
-    return next((vacancy for vacancy in list_of_vacancies if vacancy['id'] == vacancy_id),
-                f'No vacancies with vacancy_id: {vacancy_id}')
+    vacancy = select_info('vacancy', conditions=f'id={vacancy_id}')[0]
+    return render_template('vacancy_page.html', vacancy=vacancy)
 
 
 @app.put('/vacancy/<int:vacancy_id>/')
@@ -122,22 +73,35 @@ def update_some_vacancy(vacancy_id):
 
 
 @app.get('/vacancy/<int:vacancy_id>/events/')
-def get_user_events(vacancy_id=None):
-    return [event for event in list_of_events if event['vacancy_id'] == vacancy_id]
+def get_user_events(vacancy_id):
+    vacancy = select_info('vacancy', conditions=f'id={vacancy_id}')[0]
+    events = select_info('event', conditions=f'vacancy_id={vacancy_id}')
+    return render_template('events_page.html', vacancy=vacancy, events=events)
 
 
 @app.post('/vacancy/<int:vacancy_id>/events/')
 def post_new_event_for_vacancy(vacancy_id):
-    return f"Post new event for vacancy {vacancy_id}!"
+    form = dict(request.form)
+    if not form['title'] or not form['description'] or not form['due_to_date']:
+        flash('Виникла помилка. Всі поля позначені * повинні бути заповнені!', 'error')
+    else:
+        form['vacancy_id']=vacancy_id
+        insert_info('event', form)
+        flash('Інформація успішно додана', 'OK')
+    return render_template('events_page.html',
+                           events=select_info('event', conditions=f'vacancy_id={vacancy_id}'),
+                           vacancy=select_info('vacancy', conditions=f'id={vacancy_id}')[0])
 
 
 @app.get('/vacancy/<int:vacancy_id>/events/<event_id>/')
 def get_event_for_vacancy_by_id(vacancy_id, event_id):
-    return next(
-        (event for event in list_of_events if event['id'] == int(event_id)),
-        f'No events with event_id: {event_id}')
+    event = select_info('event', conditions=f'id={event_id}')[0]
+    return render_template('one_event_page.html', event=event)
 
 
 @app.put('/vacancy/<int:id>/events/<int:event_id>/')
 def update_some_event_for_vacancy(vacancy_id, event_id):
     return f"Update event {event_id} for vacancy {vacancy_id}!"
+
+
+app.run(debug=True)

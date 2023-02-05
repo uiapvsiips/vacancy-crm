@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>events</title>
+</head>
+<body>
+<h2 style="text-align: center;"><strong>Події для вакансії {{vacancy[6]}} в компанії {{vacancy[3]}}</strong></h2>
+<table style="border-collapse: collapse; width: 100%; height: 19px;" border="1">
+<tbody>
+<tr style="height: 19px;">
+<td style="width: 16.6667%; height: 19px; text-align: center;">Назва</td>
+<td style="width: 34.3749%; height: 19px; text-align: center;">Опис</td>
+<td style="width: 14.3751%; height: 19px; text-align: center;">Дата</td>
+<td style="width: 21.4583%; height: 19px; text-align: center;">Виконати до</td>
+<td style="width: 13.125%; height: 19px; text-align: center;">Статус</td>
+</tr>
+{% for event in events %}
+<tr style="height: 18px;">
+<td style="width: 5.16101%; height: 18px; text-align: center;"><a href="{{event[0]}}/">{{event[4]}}</a></td>
+<td style="width: 21.7803%; height: 18px; text-align: center;">{{event[2]}}</td>
+<td style="width: 16.9508%; height: 18px; text-align: center;">{{event[3]}}</td>
+<td style="width: 14.1099%; height: 18px; text-align: center;">{{event[5]}}</td>
+<td style="width: 23.0587%; height: 18px; text-align: center;">{{event[6]}}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+<hr />
+<div>
+     {% with errors = get_flashed_messages(category_filter=["error"]) %}
+{% if errors %}
+<div class="alert-message block-message error">
+  <ul>
+    {%- for msg in errors %}
+    <li>{{ msg }}</li>
+    {% endfor -%}
+  </ul>
+</div>
+{% endif %}
+{% endwith %}
+     {% with OK = get_flashed_messages(category_filter=["OK"]) %}
+{% if OK %}
+<div class="alert-message">
+  <ul>
+    {%- for msg in OK %}
+    <li>{{ msg }}</li>
+    {% endfor -%}
+  </ul>
+</div>
+{% endif %}
+{% endwith %}
+</div>
+<form action="" method="POST">
+<div>
+<h1 style="text-align: center;">Додати подію</h1>
+</div>
+<div style="text-align: center;"><label for="title">&nbsp; Назва*:</label> <input id="title" name="title" type="text"/>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</div>
+<div style="text-align: center;"><label for="description">Опис*: </label> <input id="description" name="description" type="text"/></div>
+<div style="text-align: center;"><label for="due_to_date">&nbsp; Виконати до*: </label> <input id="due_to_date" name="due_to_date" type="text" value="2023-02-10"/>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
+<div style="text-align: center;"><button>Додати</button></div>
+</form>
+</body>
+</html>
