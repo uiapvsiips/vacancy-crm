@@ -44,7 +44,9 @@ def get_user_vacancies_history():
 
 @app.get('/vacancy/')
 def get_user_vacancies():
-    result = select_info('vacancy')
+    #TODO delete user_id variable after doing user authorization
+    user_id=1
+    result = select_info('vacancy', conditions=f'user_id={user_id}')
     return render_template('vacancy_add.html', vacancies=result)
 
 
