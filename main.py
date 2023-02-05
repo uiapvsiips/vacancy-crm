@@ -4,8 +4,9 @@ from db_processing import select_info, insert_info
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
-#TODO delete user_id variable after doing user authorization
-user_id=1
+# TODO delete user_id variable after doing user authorization
+user_id = 1
+
 
 @app.route('/', methods=['GET'])
 @app.route('/user/', methods=['GET'])
@@ -52,7 +53,7 @@ def get_user_vacancies():
 @app.post('/vacancy/')
 def post_new_user_vacancies():
     form = request.form
-    vacancies=select_info('vacancy', conditions=f'user_id={user_id}')
+    vacancies = select_info('vacancy', conditions=f'user_id={user_id}')
     if not form['company'] or not form['contacts_ids'] or not form['description'] or not form['pocition_name']:
         flash('Виникла помилка. Всі поля позначені * повинні бути заповнені!', 'error')
     else:
@@ -88,7 +89,7 @@ def post_new_event_for_vacancy(vacancy_id):
     if not form['title'] or not form['description'] or not form['due_to_date']:
         flash('Виникла помилка. Всі поля позначені * повинні бути заповнені!', 'error')
     else:
-        form['vacancy_id']=vacancy_id
+        form['vacancy_id'] = vacancy_id
         insert_info('event', form)
         flash('Інформація успішно додана', 'OK')
     return render_template('events_page.html',
