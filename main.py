@@ -46,7 +46,6 @@ def get_user_vacancies_history():
 def get_user_vacancies():
     result = select_info('vacancy')
     return render_template('vacancy_add.html', vacancies=result)
-    # return list_of_vacancies
 
 
 @app.post('/vacancy/')
