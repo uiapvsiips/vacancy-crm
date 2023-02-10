@@ -13,5 +13,44 @@
 <li><strong>Виконати до:&nbsp;{{event[5]}}</strong></li>
     <li><strong>Статус:&nbsp;{{event[6]}}</strong></li>
 </ul>
+<hr />
+<div>
+   {% with errors = get_flashed_messages(category_filter=["error"]) %}
+{% if errors %}
+<div class="alert-message block-message error">
+  <ul>
+    {%- for msg in errors %}
+    <li>{{ msg }}</li>
+    {% endfor -%}
+  </ul>
+</div>
+{% endif %}
+{% endwith %}
+     {% with OK = get_flashed_messages(category_filter=["OK"]) %}
+{% if OK %}
+<div class="alert-message">
+  <ul>
+    {%- for msg in OK %}
+    <li>{{ msg }}</li>
+    {% endfor -%}
+  </ul>
+</div>
+<hr />
+{% endif %}
+{% endwith %}
+</div>
+<p style="text-align: center;"><button class="favorite styled" type="button"><a href="/vacancy/{{vacancy[0]}}/events/">Повернутися до всіх подій</a></button></p>
+<hr />
+<form action="" method="POST">
+<div>
+<h1 style="text-align: center;">Редагувати подію</h1>
+</div>
+<div style="text-align: center;"><label for="title">Назва:</label> <input id="title" name="title" type="text" value="{{event[4]}}"/></div>
+<div style="text-align: center;"><label for="description">Опис: </label> <input id="description" name="description" type="text" value="{{event[2]}}" /></div>
+<div style="text-align: center;"><label for="due_to_date">Виконати до:</label> <input id="due_to_date" name="due_to_date" type="text" value="{{event[5]}}"/></div>
+<div style="text-align: center;"><label for="status">&nbsp; Статус: </label> <input id="status" name="status" type="text" value="{{event[6]}}"/></div>
+<div style="text-align: center;"><button>Редагувати</button></div>
+</form>
+<hr />
 </body>
 </html>

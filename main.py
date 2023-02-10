@@ -71,10 +71,13 @@ def get_user_vacancy_by_id(vacancy_id):
     return render_template('vacancy_page.html', vacancy=vacancy)
 
 
-@app.put('/vacancy/<int:vacancy_id>/')
+@app.post('/vacancy/<int:vacancy_id>/')
 def update_some_vacancy(vacancy_id):
-    return f"Update your vacancie {vacancy_id}!"
-
+    with DB() as db:
+        db.update_info('vacancy', request.form, f'id = {vacancy_id}')
+        flash('Інформація по вакансії успішно відредагована', 'OK')
+        vacancy = db.select_info('vacancy', conditions=f'id={vacancy_id}')[0]
+    return render_template('vacancy_page.html', vacancy=vacancy)
 
 @app.get('/vacancy/<int:vacancy_id>/events/')
 def get_user_events(vacancy_id):
@@ -104,13 +107,19 @@ def post_new_event_for_vacancy(vacancy_id):
 @app.get('/vacancy/<int:vacancy_id>/events/<event_id>/')
 def get_event_for_vacancy_by_id(vacancy_id, event_id):
     with DB() as db:
+        vacancy = db.select_info('vacancy', conditions=f'id={vacancy_id}')[0]
         event = db.select_info('event', conditions=f'id={event_id}')[0]
-    return render_template('one_event_page.html', event=event)
+    return render_template('one_event_page.html', event=event, vacancy = vacancy)
 
 
-@app.put('/vacancy/<int:id>/events/<int:event_id>/')
+@app.post('/vacancy/<int:vacancy_id>/events/<int:event_id>/')
 def update_some_event_for_vacancy(vacancy_id, event_id):
-    return f"Update event {event_id} for vacancy {vacancy_id}!"
+    with DB() as db:
+        db.update_info('event', request.form, f'id = {event_id}')
+        flash('Інформація по події успішно відредагована', 'OK')
+        vacancy = db.select_info('vacancy', conditions=f'id={vacancy_id}')[0]
+        event = db.select_info('event', conditions=f'id={event_id}')[0]
+    return render_template('one_event_page.html', event=event, vacancy=vacancy)
 
 
 app.run(debug=True)
