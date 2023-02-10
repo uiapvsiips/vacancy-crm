@@ -52,13 +52,15 @@ def get_user_vacancies():
 
 @app.post('/vacancy/')
 def post_new_user_vacancies():
-    form = request.form
+    form = dict(request.form)
     with DB() as db:
         vacancies = db.select_info('vacancy', conditions=f'user_id={user_id}')
-        if not form['company'] or not form['contacts_ids'] or not form['description'] or not form['pocition_name']:
+        if not form['company'] or not form['contacts_ids'] or not form['description'] or not form['position_name']:
             flash('Виникла помилка. Всі поля позначені * повинні бути заповнені!', 'error')
         else:
-            db.insert_info('vacancy', request.form)
+            form['user_id'] = user_id
+            db.insert_info('vacancy', form)
+            vacancies = db.select_info('vacancy', conditions=f'user_id={user_id}')
             flash('Дані про вакансію успішно додано', 'OK')
         return render_template('vacancy_add.html',
                                vacancies=vacancies)
@@ -99,6 +101,7 @@ def post_new_event_for_vacancy(vacancy_id):
             form['vacancy_id'] = vacancy_id
             db.insert_info('event', form)
             flash('Інформація успішно додана', 'OK')
+            events = db.select_info('event', conditions=f'vacancy_id={vacancy_id}')
         return render_template('events_page.html',
                                events=events,
                                vacancy=vacancy)
