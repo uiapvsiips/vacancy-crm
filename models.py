@@ -65,6 +65,7 @@ class Event(Base):
         self.vacancy_id = vacancy_id
         self.status = status
 
+
 class Template(Base):
     __tablename__ = 'templates'
     id = Column(Integer, primary_key=True, autoincrement=True)
