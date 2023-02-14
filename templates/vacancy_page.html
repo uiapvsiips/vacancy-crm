@@ -7,13 +7,13 @@
 <body>
 <h2 style="text-align: center;"><strong>Вакансія {{vacancy[6]}}</strong></h2>
 <ul>
-<li><strong>Посада:&nbsp;{{vacancy[6]}}</strong></li>
-<li><strong>Компанія:&nbsp;{{vacancy[3]}}</strong></li>
-<li><strong>Дата створення:&nbsp;{{vacancy[1]}}</strong></li>
-<li><strong>Опис:&nbsp;{{vacancy[5]}}</strong></li>
-<li><strong>Контакти:&nbsp;{{vacancy[4]}}</strong></li>
-<li><strong>Коментар:&nbsp;{{vacancy[7]}}</strong></li>
-<li><strong>Статус:&nbsp;{{vacancy[2]}}</strong></li>
+<li><strong>Посада:&nbsp;{{vacancy['position_name']}}</strong></li>
+<li><strong>Компанія:&nbsp;{{vacancy['company']}}</strong></li>
+<li><strong>Дата створення:&nbsp;{{vacancy['creation_date']}}</strong></li>
+<li><strong>Опис:&nbsp;{{vacancy['description']}}</strong></li>
+<li><strong>Контакти:&nbsp;{{vacancy['contacts_ids']}}</strong></li>
+<li><strong>Коментар:&nbsp;{{vacancy['comment']}}</strong></li>
+<li><strong>Статус:&nbsp;{{vacancy['status']}}</strong></li>
 </ul>
 <hr />
 <div style="text-align: center;"><button><a href="events/">Показати події</a></button></div>
@@ -48,12 +48,12 @@
 <div>
 <h1 style="text-align: center;">Редагувати вакансію</h1>
 </div>
-<div style="text-align: center;"><label for="position">&nbsp; &nbsp; &nbsp;Посада: </label> <input id="position" name="position_name" type="text" value="{{vacancy[6]}}"/>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</div>
-<div style="text-align: center;"><label for="company">&nbsp; Компанія:</label> <input id="company" name="company" type="text" value="{{vacancy[3]}}"/>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</div>
-<div style="text-align: center;"><label for="description">Опис: </label> <input id="description" name="description" type="text" value="{{vacancy[5]}}"/></div>
-<div style="text-align: center;"><label for="contact_ids">&nbsp;Контакти: </label> <input id="contact_ids" name="contacts_ids" type="text" value="{{vacancy[4]}}"/>&nbsp; &nbsp; &nbsp; &nbsp;</div>
-<div style="text-align: center;"><label for="comment">&nbsp; Коментар: </label> <input id="comment" name="comment" type="text" value="{{vacancy[7]}}"/>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
-<div style="text-align: center;"><label for="status">&nbsp; Статус: </label> <input id="status" name="status" type="text" value="{{vacancy[2]}}"/>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
+<div style="text-align: center;"><label for="position">&nbsp; &nbsp; &nbsp;Посада: </label> <input id="position" name="position_name" type="text" value="{{vacancy['position_name']}}"/>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</div>
+<div style="text-align: center;"><label for="company">&nbsp; Компанія:</label> <input id="company" name="company" type="text" value="{{vacancy['company']}}"/>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</div>
+<div style="text-align: center;"><label for="description">Опис: </label> <input id="description" name="description" type="text" value="{{vacancy['description']}}"/></div>
+<div style="text-align: center;"><label for="contact_ids">&nbsp;Контакти: </label> <input id="contact_ids" name="contacts_ids" type="text" value="{{vacancy['contacts_ids']}}"/>&nbsp; &nbsp; &nbsp; &nbsp;</div>
+<div style="text-align: center;"><label for="comment">&nbsp; Коментар: </label> <input id="comment" name="comment" type="text" value="{{vacancy['comment']}}"/>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
+<div style="text-align: center;"><label for="status">&nbsp; Статус: </label> <input id="status" name="status" type="text" value="{{vacancy['status']}}"/>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
 <div style="text-align: center;"><button>Редагувати</button></div>
 </form>
 <hr />

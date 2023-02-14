@@ -1,5 +1,6 @@
 from flask import Flask, request, flash, render_template
-from db_processing import DB
+import alchemy_db
+from models import Vacancy, Event
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
@@ -45,83 +46,92 @@ def get_user_vacancies_history():
 
 @app.get('/vacancy/')
 def get_user_vacancies():
-    with DB() as db:
-        vacancies = db.select_info('vacancy', conditions=f'user_id={user_id}')
+    vacancies = alchemy_db.db_session.query(Vacancy).where(Vacancy.user_id==user_id).all()
     return render_template('vacancy_add.html', vacancies=vacancies)
 
 
 @app.post('/vacancy/')
 def post_new_user_vacancies():
+    alchemy_db.init_db()
     form = dict(request.form)
-    with DB() as db:
-        vacancies = db.select_info('vacancy', conditions=f'user_id={user_id}')
-        if not form['company'] or not form['contacts_ids'] or not form['description'] or not form['position_name']:
-            flash('Виникла помилка. Всі поля позначені * повинні бути заповнені!', 'error')
-        else:
-            form['user_id'] = user_id
-            db.insert_info('vacancy', form)
-            vacancies = db.select_info('vacancy', conditions=f'user_id={user_id}')
-            flash('Дані про вакансію успішно додано', 'OK')
-        return render_template('vacancy_add.html',
-                               vacancies=vacancies)
-
+    if not form['company'] or not form['contacts_ids'] or not form['description'] or not form['position_name']:
+        flash('Виникла помилка. Всі поля позначені * повинні бути заповнені!', 'error')
+    else:
+        current_vacancy = Vacancy(form.get('position_name'), form.get('company'), form.get('description'), form.get('contacts_ids'), user_id, comment=form.get('comment'))
+        alchemy_db.db_session.add(current_vacancy)
+        alchemy_db.db_session.commit()
+        flash('Дані про вакансію успішно додано', 'OK')
+        vacancies = alchemy_db.db_session.query(Vacancy).where(Vacancy.user_id == user_id).all()
+    return render_template('vacancy_add.html',
+                           vacancies=vacancies)
 
 @app.get('/vacancy/<int:vacancy_id>/')
 def get_user_vacancy_by_id(vacancy_id):
-    with DB() as db:
-        vacancy = db.select_info('vacancy', conditions=f'id={vacancy_id}')[0]
+    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all()[0]
     return render_template('vacancy_page.html', vacancy=vacancy)
 
 
 @app.post('/vacancy/<int:vacancy_id>/')
 def update_some_vacancy(vacancy_id):
-    with DB() as db:
-        db.update_info('vacancy', request.form, f'id = {vacancy_id}')
-        flash('Інформація по вакансії успішно відредагована', 'OK')
-        vacancy = db.select_info('vacancy', conditions=f'id={vacancy_id}')[0]
+    form = dict(request.form)
+    alchemy_db.db_session.query(Vacancy).filter(Vacancy.id==vacancy_id).update({Vacancy.position_name: form.get('position_name'),
+                                                                                Vacancy.company: form.get('company'),
+                                                                                Vacancy.description: form.get('description'),
+                                                                                Vacancy.contacts_ids: form.get('contacts_ids'),
+                                                                                Vacancy.comment: form.get('comment'),
+                                                                                Vacancy.status: form.get('status')
+                                                                                })
+    alchemy_db.db_session.commit()
+    flash('Інформація по вакансії успішно відредагована', 'OK')
+    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all()[0]
     return render_template('vacancy_page.html', vacancy=vacancy)
 
 @app.get('/vacancy/<int:vacancy_id>/events/')
 def get_user_events(vacancy_id):
-    with DB() as db:
-        vacancy = db.select_info('vacancy', conditions=f'id={vacancy_id}')[0]
-        events = db.select_info('event', conditions=f'vacancy_id={vacancy_id}')
+    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all()[0]
+    events = alchemy_db.db_session.query(Event).where(Event.vacancy_id == vacancy_id).all()
     return render_template('events_page.html', vacancy=vacancy, events=events)
 
 
 @app.post('/vacancy/<int:vacancy_id>/events/')
 def post_new_event_for_vacancy(vacancy_id):
     form = dict(request.form)
-    with DB() as db:
-        events = db.select_info('event', conditions=f'vacancy_id={vacancy_id}')
-        vacancy = db.select_info('vacancy', conditions=f'id={vacancy_id}')[0]
-        if not form['title'] or not form['description'] or not form['due_to_date']:
-            flash('Виникла помилка. Всі поля позначені * повинні бути заповнені!', 'error')
-        else:
-            form['vacancy_id'] = vacancy_id
-            db.insert_info('event', form)
-            flash('Інформація успішно додана', 'OK')
-            events = db.select_info('event', conditions=f'vacancy_id={vacancy_id}')
-        return render_template('events_page.html',
-                               events=events,
-                               vacancy=vacancy)
+    if not form['title'] or not form['description'] or not form['due_to_date']:
+        flash('Виникла помилка. Всі поля позначені * повинні бути заповнені!', 'error')
+    else:
+        current_event = Event(vacancy_id, form.get('description'),
+                              form.get('title'),
+                              form.get('due_to_date'))
+        alchemy_db.db_session.add(current_event)
+        alchemy_db.db_session.commit()
+        flash('Інформація успішно додана', 'OK')
+    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all()[0]
+    events = alchemy_db.db_session.query(Event).where(Event.vacancy_id == vacancy_id).all()
+    return render_template('events_page.html',
+                           events=events,
+                           vacancy=vacancy)
 
 
 @app.get('/vacancy/<int:vacancy_id>/events/<event_id>/')
 def get_event_for_vacancy_by_id(vacancy_id, event_id):
-    with DB() as db:
-        vacancy = db.select_info('vacancy', conditions=f'id={vacancy_id}')[0]
-        event = db.select_info('event', conditions=f'id={event_id}')[0]
+    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all()[0]
+    event = alchemy_db.db_session.query(Event).where(Event.id == event_id).all()[0]
     return render_template('one_event_page.html', event=event, vacancy = vacancy)
 
 
 @app.post('/vacancy/<int:vacancy_id>/events/<int:event_id>/')
 def update_some_event_for_vacancy(vacancy_id, event_id):
-    with DB() as db:
-        db.update_info('event', request.form, f'id = {event_id}')
-        flash('Інформація по події успішно відредагована', 'OK')
-        vacancy = db.select_info('vacancy', conditions=f'id={vacancy_id}')[0]
-        event = db.select_info('event', conditions=f'id={event_id}')[0]
+    form = dict(request.form)
+    alchemy_db.db_session.query(Event).filter(Event.id == event_id).update(
+        {Event.title: form.get('title'),
+         Event.description: form.get('description'),
+         Event.due_to_date: form.get('due_to_date'),
+         Event.status: form.get('status')
+         })
+    alchemy_db.db_session.commit()
+    flash('Інформація по події успішно відредагована', 'OK')
+    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all()[0]
+    event = alchemy_db.db_session.query(Event).where(Event.id == event_id).all()[0]
     return render_template('one_event_page.html', event=event, vacancy=vacancy)
 
 

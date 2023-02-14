@@ -16,16 +16,18 @@
 <td style="width: 21.7803%; height: 18px; text-align: center;"><strong>Дата створення</strong></td>
 <td style="width: 23.0587%; height: 18px; text-align: center;"><strong>Опис</strong></td>
 <td style="width: 14.1099%; height: 18px; text-align: center;"><strong>Контакти</strong></td>
+<td style="width: 14.1099%; height: 18px; text-align: center;"><strong>Коментар</strong></td>
 <td style="width: 8.33335%; height: 18px; text-align: center;"><strong>Статус</strong></td>
 </tr>
 {% for vacancy in vacancies %}
 <tr style="height: 18px;">
-<td style="width: 21.7803%; height: 18px; text-align: center;"><a href="{{vacancy[0]}}/">{{vacancy[6]}}</a></td>
-<td style="width: 16.9508%; height: 18px; text-align: center;">{{vacancy[3]}}</td>
-<td style="width: 14.1099%; height: 18px; text-align: center;">{{vacancy[1]}}</td>
-<td style="width: 23.0587%; height: 18px; text-align: center;">{{vacancy[5]}}</td>
-<td style="width: 10.6061%; height: 18px; text-align: center;">{{vacancy[4]}}</td>
-<td style="width: 8.33335%; height: 18px; text-align: center;">{{vacancy[2]}}</td>
+<td style="width: 21.7803%; height: 18px; text-align: center;"><a href="{{vacancy['user_id']}}/">{{vacancy['position_name']}}</a></td>
+<td style="width: 16.9508%; height: 18px; text-align: center;">{{vacancy['company']}}</td>
+<td style="width: 14.1099%; height: 18px; text-align: center;">{{vacancy['creation_date']}}</td>
+<td style="width: 23.0587%; height: 18px; text-align: center;">{{vacancy['description']}}</td>
+<td style="width: 23.0587%; height: 18px; text-align: center;">{{vacancy['contact_ids']}}</td>
+<td style="width: 10.6061%; height: 18px; text-align: center;">{{vacancy['comment']}}</td>
+<td style="width: 8.33335%; height: 18px; text-align: center;">{{vacancy['status']}}</td>
 </tr>
 {% endfor %}
 </tbody>

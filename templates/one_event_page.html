@@ -5,13 +5,13 @@
     <title>{{event[4]}}</title>
 </head>
 <body>
-<h2 style="text-align: center;"><strong>Подія {{event[4]}}</strong></h2>
+<h2 style="text-align: center;"><strong>Подія {{event['title']}}</strong></h2>
 <ul>
-<li><strong>Назва:&nbsp;{{event[4]}}</strong></li>
-<li><strong>Опис:&nbsp;{{event[2]}}</strong></li>
-<li><strong>Дата створення:&nbsp;{{event[3]}}</strong></li>
-<li><strong>Виконати до:&nbsp;{{event[5]}}</strong></li>
-    <li><strong>Статус:&nbsp;{{event[6]}}</strong></li>
+<li><strong>Назва:&nbsp;{{event['title']}}</strong></li>
+<li><strong>Опис:&nbsp;{{event['description']}}</strong></li>
+<li><strong>Дата створення:&nbsp;{{event['event_date']}}</strong></li>
+<li><strong>Виконати до:&nbsp;{{event['due_to_date']}}</strong></li>
+    <li><strong>Статус:&nbsp;{{event['status']}}</strong></li>
 </ul>
 <hr />
 <div>
@@ -39,16 +39,16 @@
 {% endif %}
 {% endwith %}
 </div>
-<p style="text-align: center;"><button class="favorite styled" type="button"><a href="/vacancy/{{vacancy[0]}}/events/">Повернутися до всіх подій</a></button></p>
+<p style="text-align: center;"><button class="favorite styled" type="button"><a href="/vacancy/{{vacancy['id']}}/events/">Повернутися до всіх подій</a></button></p>
 <hr />
 <form action="" method="POST">
 <div>
 <h1 style="text-align: center;">Редагувати подію</h1>
 </div>
-<div style="text-align: center;"><label for="title">Назва:</label> <input id="title" name="title" type="text" value="{{event[4]}}"/></div>
-<div style="text-align: center;"><label for="description">Опис: </label> <input id="description" name="description" type="text" value="{{event[2]}}" /></div>
-<div style="text-align: center;"><label for="due_to_date">Виконати до:</label> <input id="due_to_date" name="due_to_date" type="text" value="{{event[5]}}"/></div>
-<div style="text-align: center;"><label for="status">&nbsp; Статус: </label> <input id="status" name="status" type="text" value="{{event[6]}}"/></div>
+<div style="text-align: center;"><label for="title">Назва:</label> <input id="title" name="title" type="text" value="{{event['title']}}"/></div>
+<div style="text-align: center;"><label for="description">Опис: </label> <input id="description" name="description" type="text" value="{{event['description']}}" /></div>
+<div style="text-align: center;"><label for="due_to_date">Виконати до:</label> <input id="due_to_date" name="due_to_date" type="text" value="{{event['due_to_date']}}"/></div>
+<div style="text-align: center;"><label for="status">&nbsp; Статус: </label> <input id="status" name="status" type="text" value="{{event['status']}}"/></div>
 <div style="text-align: center;"><button>Редагувати</button></div>
 </form>
 <hr />
