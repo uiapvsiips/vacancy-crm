@@ -129,7 +129,7 @@ def update_some_event_for_vacancy(vacancy_id, event_id):
          Event.status: form.get('status')
          })
     alchemy_db.db_session.commit()
-    flash('Інформація по події успішно відредагована', 'OK')
+    flash('Інформація по подію успішно відредагована', 'OK')
     vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all()[0]
     event = alchemy_db.db_session.query(Event).where(Event.id == event_id).all()[0]
     return render_template('one_event_page.html', event=event, vacancy=vacancy)
