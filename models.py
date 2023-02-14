@@ -13,9 +13,6 @@ class User(Base):
         self.email = email
         self.password = password
 
-    def __repr__(self):
-        return f'<User {self.name!r}>'
-
 class EmailCredentials(Base):
     __tablename__ = 'email_creds'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -29,9 +26,6 @@ class EmailCredentials(Base):
     def __init__(self, login, password):
         self.login = login
         self.password = password
-
-    def __repr__(self):
-        return f'<EmailCredentials {self.email!r}>'
 
 class Vacancy(Base):
     __tablename__ = 'vacancy'
