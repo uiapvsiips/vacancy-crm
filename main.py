@@ -134,5 +134,4 @@ def update_some_event_for_vacancy(vacancy_id, event_id):
     event = alchemy_db.db_session.query(Event).where(Event.id == event_id).all()[0]
     return render_template('one_event_page.html', event=event, vacancy=vacancy)
 
-
 app.run(debug=True)
