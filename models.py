@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, func, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, func, Text, text
 from alchemy_db import Base
 
 class User(Base):
@@ -30,11 +30,11 @@ class EmailCredentials(Base):
 class Vacancy(Base):
     __tablename__ = 'vacancy'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    creation_date = Column(String(20), nullable=False, server_default=func.now())
+    creation_date = Column(String(25), nullable=False, server_default=text("date_trunc('second', now())"))
     status = Column(Integer, nullable=False, default=0)
     position_name = Column(String(120), nullable=False)
     company = Column(String(120), nullable=False)
-    description = Column(String(1000), nullable=False)
+    description = Column(String(5000), nullable=False)
     contacts_ids = Column(String(120), nullable=False)
     comment = Column(String(120))
     user_id = Column(Integer, ForeignKey('user.id'))

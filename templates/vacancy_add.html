@@ -2,32 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>New Vacancy</title>
+    <script>
+        function showFields() {
+        if(document.getElementById("form").style.display=='')
+        {
+        document.getElementById("form").style.display = 'flex';
+        }
+        else
+        document.getElementById("form").style.display = '';
+}
+    </script>
 </head>
 <body>
-<h1 style="text-align: center;">Список вакансій</h1>
+<div class="dashboard">
+
+</div>
+<div id="main-block">
+<h1>Список вакансій</h1>
 <hr />
 <div>
-<table style="border-collapse: collapse; width: 100%; height: 36px;" border="1">
+<table>
 <tbody>
-<tr style="height: 18px;">
-    <td style="width: 10.6061%; height: 18px; text-align: center;"><strong>Посада</strong></td>
-    <td style="width: 16.9508%; height: 18px; text-align: center;"><strong>Компанія</strong></td>
-<td style="width: 21.7803%; height: 18px; text-align: center;"><strong>Дата створення</strong></td>
-<td style="width: 23.0587%; height: 18px; text-align: center;"><strong>Опис</strong></td>
-<td style="width: 14.1099%; height: 18px; text-align: center;"><strong>Контакти</strong></td>
-<td style="width: 14.1099%; height: 18px; text-align: center;"><strong>Коментар</strong></td>
-<td style="width: 8.33335%; height: 18px; text-align: center;"><strong>Статус</strong></td>
+<tr>
+<th><strong>Посада</strong></th>
+<th><strong>Компанія</strong></th>
+<th><strong>Дата створення</strong></th>
 </tr>
 {% for vacancy in vacancies %}
-<tr style="height: 18px;">
-<td style="width: 21.7803%; height: 18px; text-align: center;"><a href="{{vacancy['id']}}/">{{vacancy['position_name']}}</a></td>
-<td style="width: 16.9508%; height: 18px; text-align: center;">{{vacancy['company']}}</td>
-<td style="width: 14.1099%; height: 18px; text-align: center;">{{vacancy['creation_date']}}</td>
-<td style="width: 23.0587%; height: 18px; text-align: center;">{{vacancy['description']}}</td>
-<td style="width: 23.0587%; height: 18px; text-align: center;">{{vacancy['contacts_ids']}}</td>
-<td style="width: 10.6061%; height: 18px; text-align: center;">{{vacancy['comment']}}</td>
-<td style="width: 8.33335%; height: 18px; text-align: center;">{{vacancy['status']}}</td>
+<tr>
+<td><a href="{{vacancy['id']}}/">{{vacancy['position_name']}}</a></td>
+<td>{{vacancy['company']}}</td>
+<td>{{vacancy['creation_date']}}</td>
 </tr>
 {% endfor %}
 </tbody>
@@ -58,17 +65,21 @@
 {% endif %}
 {% endwith %}
 </div>
-<form action="" method="POST">
+    <div><button class="button" onclick="showFields()">Додати нову вакансію</button></div>
+<form id="form" action="" method="POST">
 <div>
-<h1 style="text-align: center;">Додати вакансію</h1>
+<h1>Додати вакансію</h1>
 </div>
-<div style="text-align: center;"><label for="company">&nbsp; Компанія*:</label> <input id="company" name="company" type="text"/>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</div>
-<div style="text-align: center;"><label for="description">Опис*: </label> <input id="description" name="description" type="text"/></div>
-<div style="text-align: center;"><label for="position">&nbsp; &nbsp; &nbsp;Посада*: </label> <input id="position" name="position_name" type="text"/>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</div>
-<div style="text-align: center;"><label for="contact_ids">&nbsp;Контакти*: </label> <input id="contact_ids" name="contacts_ids" type="text" />&nbsp; &nbsp; &nbsp; &nbsp;</div>
-<div style="text-align: center;"><label for="comment">&nbsp; Коментар: </label> <input id="comment" name="comment" type="text"/>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
-<div style="text-align: center;"><button>Додати</button></div>
+<div><label for="company">Компанія*:</label> <input id="company" name="company" type="text"/></div>
+<div><label for="description">Опис*: </label> <input id="description" name="description" type="text"/></div>
+<div><label for="position">Посада*: </label> <input id="position" name="position_name" type="text"/></div>
+<div><label for="contact_ids">Контакти*: </label> <input id="contact_ids" name="contacts_ids" type="text"/></div>
+<div><label for="comment">Коментар: </label> <input id="comment" name="comment" type="text"/></div>
+<div><button class="button">Додати</button></div>
 </form>
 <hr />
+</div>
+<div id="vacancy-block">
+</div>
 </body>
 </html>

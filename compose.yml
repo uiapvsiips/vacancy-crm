@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    restart: always
+    ports:
+      - "5004:5004"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      DB_HOST: db
+      POSTGRES_PASSWORD: pgpass
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
