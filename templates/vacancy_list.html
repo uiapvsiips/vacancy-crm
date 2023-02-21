@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>vacancy-crm</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+     <link rel="stylesheet" href="{{ url_for('static', filename='styles1.css') }}">
+    <script src="{{ url_for('static', filename='JSMethods.js') }}"></script>
+  </head>
+  <body class="conainer">
+    <div class="dashboard">
+        <div class="logo-container">
+            <a href="user">
+                <img src="{{ url_for('static', filename='logo.svg') }}" alt="Логотип">
+              </a>
+          </div>
+        <div class="links">
+          <ul>
+            <li><a href="user">Користувач</a></li>
+            <li><a href="vacancy">Вакансії</a></li>
+          </ul>
+        </div>
+      </div>
+
+    <!-- Центральная часть (Список вакансий) -->
+    <div class="job-list">
+      <h2>Список вакансій</h2>
+      <ul>
+        {% for vacancy in vacancies %}
+        <li><a href="{{vacancy['id']}}/">{{vacancy.position_name}} в {{vacancy.company}}</a></li>
+        {% endfor %}
+      </ul>
+      <button id="add-job-btn">Додати вакансію</button>
+      <div id="job-form-container">
+        <h2>Додавання вакансії</h2>
+        <form id="form" action="" method="post">
+          <label for="company">Компанія:</label>
+          <input type="text" id="company" name="company"><br><br>
+          <label for="description">Опис:</label>
+          <textarea id="description" name="description"></textarea><br><br>
+          <label for="position_name">Посада:</label>
+          <input type="text" id="position_name" name="position_name"><br><br>
+          <label for="contacts_ids">Контакти:</label>
+          <input type="text" id="contacts_ids" name="contacts_ids"><br><br>
+          <label for="comment">Коментар:</label>
+          <input type="text" id="comment" name="comment"><br><br>
+          <button type="submit">Додати</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Правая часть (Реклама) -->
+    <div class="advertising">
+      <h2>Реклама</h2>
+      <p>Содержимое рекламного блока.</p>
+    </div>
+  </body>
+</html>
