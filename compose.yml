@@ -15,7 +15,6 @@ services:
     image: postgres
     restart: always
     environment:
-      DB_HOST: db
       POSTGRES_PASSWORD: pgpass
       POSTGRES_USER: postgres
       POSTGRES_DB: postgres

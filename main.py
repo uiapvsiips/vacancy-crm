@@ -47,8 +47,8 @@ def get_user_vacancies_history():
 @app.get('/vacancy/')
 def get_user_vacancies():
     vacancies = alchemy_db.db_session.query(Vacancy).where(Vacancy.user_id==user_id).all()
-    return render_template('vacancy_list.html', vacancies=vacancies)
-    # return render_template('vacancy_add.html', vacancies=vacancies)
+    # return render_template('vacancy_list.html', vacancies=vacancies)
+    return render_template('vacancy_add.html', vacancies=vacancies)
 
 
 @app.post('/vacancy/')
@@ -70,7 +70,8 @@ def post_new_user_vacancies():
 def get_user_vacancy_by_id(vacancy_id):
     vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all()[0]
     vacancies = alchemy_db.db_session.query(Vacancy).where(Vacancy.user_id == user_id).all()
-    return render_template('vacancy_page1.html', vacancy=vacancy, vacancies=vacancies)
+    return render_template('vacancy_page.html', vacancy=vacancy, vacancies=vacancies)
+    # return render_template('vacancy_page1.html', vacancy=vacancy, vacancies=vacancies)
 
 
 @app.post('/vacancy/<int:vacancy_id>/')
