@@ -9,7 +9,9 @@ from alembic import context
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-
+DB_HOST = os.environ.get('DB_HOST', 'localhost')
+conn_str=f'postgresql://postgres:pgpass@{DB_HOST}:5432/postgres'
+config.set_main_option("sqlalchemy.url", conn_str)
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
@@ -40,9 +42,6 @@ def run_migrations_offline() -> None:
 
     """
     url = config.get_main_option("sqlalchemy.url")
-    if os.environ.get('DB_HOST'):
-        url = config.get_main_option("sqlalchemy.docker.url")
-        config.set_section_option()
     context.configure(
         url=url,
         target_metadata=target_metadata,
