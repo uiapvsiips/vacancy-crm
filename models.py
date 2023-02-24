@@ -20,7 +20,6 @@ class EmailCredentials(Base):
     email = Column(String(120), unique=True, nullable=False)
     login = Column(String(120), unique=True, nullable=False)
     password = Column(String(120), nullable=False)
-    pop_server = Column(String(120), nullable=False)
     smtp_server = Column(String(120), nullable=False)
 
     def __init__(self, login, password):

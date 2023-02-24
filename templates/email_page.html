@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Email Sender</title>
+        </head>
+        <body>
+        <h1>Emails</h1>
+	<table>
+		<thead>
+			<tr>
+				<th>From</th>
+				<th>Subject</th>
+				<th>Date</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for email in emails %}
+			<tr>
+				<td>{{ email.from }}</td>
+				<td>{{ email.subject }}</td>
+				<td>{{ email.date }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+            <div>
+                 {% with OK = get_flashed_messages(category_filter=["OK"]) %}
+{% if OK %}
+<div class="alert-message">
+  <ul>
+    {%- for msg in OK %}
+    <li>{{ msg }}</li>
+    {% endfor -%}
+  </ul>
+</div>
+{% endif %}
+{% endwith %}
+            </div>
+            <h1>Email Sender</h1>
+            <form id="form" method="post" action="">
+                <label for="to">To:</label>
+                <input type="text" id="to" name="to" required><br><br>
+                <label for="subject">Subject:</label>
+                <input type="text" id="subject" name="subject" required><br><br>
+                <label for="message">Message:</label><br>
+                <textarea id="message" name="message" rows="10" cols="50" required></textarea><br><br>
+                <input type="submit" value="Send">
+            </form>
+        </body>
+        </html>

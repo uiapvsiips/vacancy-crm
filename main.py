@@ -1,6 +1,7 @@
 from flask import Flask, request, flash, render_template
 import alchemy_db
-from models import Vacancy, Event
+from models import Vacancy, Event, EmailCredentials
+from email_process import EmailWorker
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
@@ -17,12 +18,6 @@ def main_page():
 @app.route('/user/calendar/', methods=['GET'])
 def get_user_calendar():
     return "Get your Calendar!"
-
-
-@app.route('/user/mail/', methods=['GET'])
-def get_user_mail():
-    return "Get your Mail!"
-
 
 @app.route('/user/settings/', methods=['GET', 'PUT'])
 def get_user_settings():
@@ -43,6 +38,25 @@ def get_user_docs():
 def get_user_vacancies_history():
     return "Get your vacancies history!"
 
+@app.get('/user/mail/')
+def get_user_mail():
+    email_creds = alchemy_db.db_session.query(EmailCredentials).where(EmailCredentials.user_id == user_id).first()
+    email = EmailWorker(email_creds.email, email_creds.login, email_creds.password, email_creds.smtp_server)
+    email.connect()
+    emails = email.read_emails()
+    email.disconnect()
+    return render_template('email_page.html', emails=emails)
+
+@app.post('/user/mail/')
+def post_user_mail():
+    email_creds = alchemy_db.db_session.query(EmailCredentials).where(EmailCredentials.user_id==user_id).first()
+    email = EmailWorker(email_creds.email, email_creds.login, email_creds.password, email_creds.smtp_server)
+    email.connect()
+    email.send_email(request.form.get('to'), request.form.get('subject'), request.form.get('message'))
+    emails = email.read_emails()
+    email.disconnect()
+    flash('Лист відправлено успішно', 'OK')
+    return render_template('email_page.html', emails=emails)
 
 @app.get('/vacancy/')
 def get_user_vacancies():
@@ -68,7 +82,7 @@ def post_new_user_vacancies():
 
 @app.get('/vacancy/<int:vacancy_id>/')
 def get_user_vacancy_by_id(vacancy_id):
-    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all()[0]
+    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all().first()
     vacancies = alchemy_db.db_session.query(Vacancy).where(Vacancy.user_id == user_id).all()
     return render_template('vacancy_page.html', vacancy=vacancy, vacancies=vacancies)
     # return render_template('vacancy_page1.html', vacancy=vacancy, vacancies=vacancies)
@@ -86,12 +100,12 @@ def update_some_vacancy(vacancy_id):
                                                                                 })
     alchemy_db.db_session.commit()
     flash('Інформація по вакансії успішно відредагована', 'OK')
-    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all()[0]
+    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all().first()
     return render_template('vacancy_page.html', vacancy=vacancy)
 
 @app.get('/vacancy/<int:vacancy_id>/events/')
 def get_user_events(vacancy_id):
-    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all()[0]
+    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all().first()
     events = alchemy_db.db_session.query(Event).where(Event.vacancy_id == vacancy_id).all()
     return render_template('events_page.html', vacancy=vacancy, events=events)
 
@@ -108,7 +122,7 @@ def post_new_event_for_vacancy(vacancy_id):
         alchemy_db.db_session.add(current_event)
         alchemy_db.db_session.commit()
         flash('Інформація успішно додана', 'OK')
-    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all()[0]
+    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all().first()
     events = alchemy_db.db_session.query(Event).where(Event.vacancy_id == vacancy_id).all()
     return render_template('events_page.html',
                            events=events,
@@ -117,8 +131,8 @@ def post_new_event_for_vacancy(vacancy_id):
 
 @app.get('/vacancy/<int:vacancy_id>/events/<event_id>/')
 def get_event_for_vacancy_by_id(vacancy_id, event_id):
-    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all()[0]
-    event = alchemy_db.db_session.query(Event).where(Event.id == event_id).all()[0]
+    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all().first()
+    event = alchemy_db.db_session.query(Event).where(Event.id == event_id).all().first()
     return render_template('one_event_page.html', event=event, vacancy = vacancy)
 
 
@@ -133,8 +147,8 @@ def update_some_event_for_vacancy(vacancy_id, event_id):
          })
     alchemy_db.db_session.commit()
     flash('Інформація по подію успішно відредагована', 'OK')
-    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all()[0]
-    event = alchemy_db.db_session.query(Event).where(Event.id == event_id).all()[0]
+    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all().first()
+    event = alchemy_db.db_session.query(Event).where(Event.id == event_id).first()
     return render_template('one_event_page.html', event=event, vacancy=vacancy)
 
 app.run(debug=True)
