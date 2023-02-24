@@ -12,6 +12,13 @@ class EmailWorker:
         self.port = port
         self.connection = None
 
+    def __enter__(self):
+        self.connect()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.disconnect()
+
     def connect(self):
         self.connection = smtplib.SMTP_SSL(self.smtp_server, self.port)
         self.connection.login(self.login, self.password)

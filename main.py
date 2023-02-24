@@ -41,21 +41,17 @@ def get_user_vacancies_history():
 @app.get('/user/mail/')
 def get_user_mail():
     email_creds = alchemy_db.db_session.query(EmailCredentials).where(EmailCredentials.user_id == user_id).first()
-    email = EmailWorker(email_creds.email, email_creds.login, email_creds.password, email_creds.smtp_server)
-    email.connect()
-    emails = email.read_emails()
-    email.disconnect()
+    with EmailWorker(email_creds.email, email_creds.login, email_creds.password, email_creds.smtp_server) as email:
+        emails = email.read_emails()
     return render_template('email_page.html', emails=emails)
 
 @app.post('/user/mail/')
 def post_user_mail():
     email_creds = alchemy_db.db_session.query(EmailCredentials).where(EmailCredentials.user_id==user_id).first()
-    email = EmailWorker(email_creds.email, email_creds.login, email_creds.password, email_creds.smtp_server)
-    email.connect()
-    email.send_email(request.form.get('to'), request.form.get('subject'), request.form.get('message'))
-    emails = email.read_emails()
-    email.disconnect()
-    flash('Лист відправлено успішно', 'OK')
+    with EmailWorker(email_creds.email, email_creds.login, email_creds.password, email_creds.smtp_server) as email:
+        email.send_email(request.form.get('to'), request.form.get('subject'), request.form.get('message'))
+        emails = email.read_emails()
+        flash('Лист відправлено успішно', 'OK')
     return render_template('email_page.html', emails=emails)
 
 @app.get('/vacancy/')
