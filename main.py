@@ -48,7 +48,6 @@ def get_user_mail():
                      email_creds.smtp_server, email_creds.smtp_port,
                      email_creds.pop_server, email_creds.pop_port,
                      email_creds.imap_server,email_creds.imap_port)
-    emails = []
     if email.imap_server:
         emails = email.get_emails([1, 2, 3], protocol='imap')
     else:
@@ -59,16 +58,16 @@ def get_user_mail():
 @app.post('/user/mail/')
 def post_user_mail():
     email_creds = alchemy_db.db_session.query(EmailCredentials).where(EmailCredentials.user_id == user_id).first()
-    with EmailWorker(email_creds.email, email_creds.login, email_creds.password,
+    email = EmailWorker(email_creds.email, email_creds.login, email_creds.password,
                      email_creds.smtp_server, email_creds.smtp_port,
-                     email_creds.pop3_server, email_creds.pop3_port,
-                     email_creds.imap_server, email_creds.imap_port) as email:
-        email.send_email(request.form.get('to'), request.form.get('subject'), request.form.get('message'))
-        if email.pop3_server:
-            emails = email.get_emails([1, 2, 3], protocol='pop3')
-        else:
-            emails = email.get_emails([1, 2, 3], protocol='imap')
-        flash('Лист відправлено успішно', 'OK')
+                     email_creds.pop_server, email_creds.pop_port,
+                     email_creds.imap_server, email_creds.imap_port)
+    email.send_email(request.form.get('to'), request.form.get('subject'), request.form.get('message'))
+    if email.pop_server:
+        emails = email.get_emails([1, 2, 3], protocol='pop3')
+    else:
+        emails = email.get_emails([1, 2, 3], protocol='imap')
+    flash('Лист відправлено успішно', 'OK')
     return render_template('email_page.html', emails=emails)
 
 
