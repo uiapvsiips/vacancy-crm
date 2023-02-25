@@ -1,7 +1,8 @@
 from flask import Flask, request, flash, render_template
+
 import alchemy_db
-from models import Vacancy, Event, EmailCredentials
 from email_process import EmailWorker
+from models import Vacancy, Event, EmailCredentials
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
@@ -18,6 +19,7 @@ def main_page():
 @app.route('/user/calendar/', methods=['GET'])
 def get_user_calendar():
     return "Get your Calendar!"
+
 
 @app.route('/user/settings/', methods=['GET', 'PUT'])
 def get_user_settings():
@@ -38,25 +40,40 @@ def get_user_docs():
 def get_user_vacancies_history():
     return "Get your vacancies history!"
 
+
 @app.get('/user/mail/')
 def get_user_mail():
     email_creds = alchemy_db.db_session.query(EmailCredentials).where(EmailCredentials.user_id == user_id).first()
-    with EmailWorker(email_creds.email, email_creds.login, email_creds.password, email_creds.smtp_server) as email:
-        emails = email.read_emails()
+    with EmailWorker(email_creds.email, email_creds.login, email_creds.password,
+                     email_creds.smtp_server, email_creds.smtp_port,
+                     email_creds.pop3_server, email_creds.pop3_port,
+                     email_creds.imap_server, email_creds.imap_port) as email:
+        if email.pop3_server:
+            emails = email.get_emails([1, 2, 3], protocol='pop3')
+        else:
+            emails = email.get_emails([1, 2, 3], protocol='imap')
     return render_template('email_page.html', emails=emails)
+
 
 @app.post('/user/mail/')
 def post_user_mail():
-    email_creds = alchemy_db.db_session.query(EmailCredentials).where(EmailCredentials.user_id==user_id).first()
-    with EmailWorker(email_creds.email, email_creds.login, email_creds.password, email_creds.smtp_server) as email:
+    email_creds = alchemy_db.db_session.query(EmailCredentials).where(EmailCredentials.user_id == user_id).first()
+    with EmailWorker(email_creds.email, email_creds.login, email_creds.password,
+                     email_creds.smtp_server, email_creds.smtp_port,
+                     email_creds.pop3_server, email_creds.pop3_port,
+                     email_creds.imap_server, email_creds.imap_port) as email:
         email.send_email(request.form.get('to'), request.form.get('subject'), request.form.get('message'))
-        emails = email.read_emails()
+        if email.pop3_server:
+            emails = email.get_emails([1, 2, 3], protocol='pop3')
+        else:
+            emails = email.get_emails([1, 2, 3], protocol='imap')
         flash('Лист відправлено успішно', 'OK')
     return render_template('email_page.html', emails=emails)
 
+
 @app.get('/vacancy/')
 def get_user_vacancies():
-    vacancies = alchemy_db.db_session.query(Vacancy).where(Vacancy.user_id==user_id).all()
+    vacancies = alchemy_db.db_session.query(Vacancy).where(Vacancy.user_id == user_id).all()
     # return render_template('vacancy_list.html', vacancies=vacancies)
     return render_template('vacancy_add.html', vacancies=vacancies)
 
@@ -68,13 +85,15 @@ def post_new_user_vacancies():
     if not form['company'] or not form['contacts_ids'] or not form['description'] or not form['position_name']:
         flash('Виникла помилка. Всі поля позначені * повинні бути заповнені!', 'error')
     else:
-        current_vacancy = Vacancy(form.get('position_name'), form.get('company'), form.get('description'), form.get('contacts_ids'), user_id, comment=form.get('comment'))
+        current_vacancy = Vacancy(form.get('position_name'), form.get('company'), form.get('description'),
+                                  form.get('contacts_ids'), user_id, comment=form.get('comment'))
         alchemy_db.db_session.add(current_vacancy)
         alchemy_db.db_session.commit()
         flash('Дані про вакансію успішно додано', 'OK')
         vacancies = alchemy_db.db_session.query(Vacancy).where(Vacancy.user_id == user_id).all()
     return render_template('vacancy_add.html',
                            vacancies=vacancies)
+
 
 @app.get('/vacancy/<int:vacancy_id>/')
 def get_user_vacancy_by_id(vacancy_id):
@@ -87,17 +106,19 @@ def get_user_vacancy_by_id(vacancy_id):
 @app.post('/vacancy/<int:vacancy_id>/')
 def update_some_vacancy(vacancy_id):
     form = dict(request.form)
-    alchemy_db.db_session.query(Vacancy).filter(Vacancy.id==vacancy_id).update({Vacancy.position_name: form.get('position_name'),
-                                                                                Vacancy.company: form.get('company'),
-                                                                                Vacancy.description: form.get('description'),
-                                                                                Vacancy.contacts_ids: form.get('contacts_ids'),
-                                                                                Vacancy.comment: form.get('comment'),
-                                                                                Vacancy.status: form.get('status')
-                                                                                })
+    alchemy_db.db_session.query(Vacancy).filter(Vacancy.id == vacancy_id).update(
+        {Vacancy.position_name: form.get('position_name'),
+         Vacancy.company: form.get('company'),
+         Vacancy.description: form.get('description'),
+         Vacancy.contacts_ids: form.get('contacts_ids'),
+         Vacancy.comment: form.get('comment'),
+         Vacancy.status: form.get('status')
+         })
     alchemy_db.db_session.commit()
     flash('Інформація по вакансії успішно відредагована', 'OK')
     vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all().first()
     return render_template('vacancy_page.html', vacancy=vacancy)
+
 
 @app.get('/vacancy/<int:vacancy_id>/events/')
 def get_user_events(vacancy_id):
@@ -129,7 +150,7 @@ def post_new_event_for_vacancy(vacancy_id):
 def get_event_for_vacancy_by_id(vacancy_id, event_id):
     vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all().first()
     event = alchemy_db.db_session.query(Event).where(Event.id == event_id).all().first()
-    return render_template('one_event_page.html', event=event, vacancy = vacancy)
+    return render_template('one_event_page.html', event=event, vacancy=vacancy)
 
 
 @app.post('/vacancy/<int:vacancy_id>/events/<int:event_id>/')
@@ -146,5 +167,6 @@ def update_some_event_for_vacancy(vacancy_id, event_id):
     vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all().first()
     event = alchemy_db.db_session.query(Event).where(Event.id == event_id).first()
     return render_template('one_event_page.html', event=event, vacancy=vacancy)
+
 
 app.run(debug=True)

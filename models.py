@@ -21,10 +21,24 @@ class EmailCredentials(Base):
     login = Column(String(120), unique=True, nullable=False)
     password = Column(String(120), nullable=False)
     smtp_server = Column(String(120), nullable=False)
+    smtp_port = Column(Integer, nullable=False)
+    pop_server = Column(String(120))
+    pop_port = Column(Integer)
+    imap_server = Column(String(120))
+    imap_port = Column(Integer)
 
-    def __init__(self, login, password):
+
+    def __init__(self, login, password, email, smtp_server, smtp_port, pop_server, pop_port, imap_server, imap_port):
         self.login = login
         self.password = password
+        self.email = email
+        self.smtp_server = smtp_server
+        self.smtp_port = smtp_port
+        self.pop_server = pop_server
+        self.pop_port = pop_port
+        self.imap_server = imap_server
+        self.imap_port = imap_port
+
 
 class Vacancy(Base):
     __tablename__ = 'vacancy'
