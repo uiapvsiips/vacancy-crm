@@ -25,9 +25,3 @@ class Mongo_process:
 
     def update_doc(self, document_id, doc:dict):
         self.collection.update_one({"_id": ObjectId(document_id)},{ "$set": doc})
-
-if __name__ == "__main__":
-    b=1
-    with Mongo_process() as mongo:
-        mongo.insert_doc({"name":"123"})
-        obj = mongo.get_doc("63ff2bc83fda2b56e883cd3d")
