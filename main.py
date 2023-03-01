@@ -1,5 +1,5 @@
 from flask import Flask, request, flash, render_template
-
+from mongo_db import Mongo_process
 import alchemy_db
 from email_process import EmailWorker
 from models import Vacancy, Event, EmailCredentials
@@ -74,7 +74,11 @@ def post_user_mail():
 @app.get('/vacancy/')
 def get_user_vacancies():
     vacancies = alchemy_db.db_session.query(Vacancy).where(Vacancy.user_id == user_id).all()
-    # return render_template('vacancy_list.html', vacancies=vacancies)
+    contacts = []
+    with Mongo_process() as mongo:
+        for vacancy in vacancies:
+            [contacts.append(mongo.get_doc(contact_id)) for contact_id in vacancy.contacts_ids.split(',')] #Отримання контактів з Mongo через list comprehension
+    #return render_template('vacancy_list.html', vacancies=vacancies)
     return render_template('vacancy_add.html', vacancies=vacancies)
 
 
@@ -82,11 +86,15 @@ def get_user_vacancies():
 def post_new_user_vacancies():
     alchemy_db.init_db()
     form = dict(request.form)
-    if not form['company'] or not form['contacts_ids'] or not form['description'] or not form['position_name']:
+    if not form['company'] or not form['name'] or not form['description'] or not form['position_name']:
         flash('Виникла помилка. Всі поля позначені * повинні бути заповнені!', 'error')
     else:
+        contacts = {"name": form.get("name"), "email": form.get("email"), "phone_number": form.get("phone_number")}
+        contatct_id = None
+        with Mongo_process() as mongo:
+            contatct_id = str(mongo.insert_doc(contacts))
         current_vacancy = Vacancy(form.get('position_name'), form.get('company'), form.get('description'),
-                                  form.get('contacts_ids'), user_id, comment=form.get('comment'))
+                                  contatct_id, user_id, comment=form.get('comment'))
         alchemy_db.db_session.add(current_vacancy)
         alchemy_db.db_session.commit()
         flash('Дані про вакансію успішно додано', 'OK')
@@ -97,32 +105,42 @@ def post_new_user_vacancies():
 
 @app.get('/vacancy/<int:vacancy_id>/')
 def get_user_vacancy_by_id(vacancy_id):
-    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all().first()
+    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).first()
+    contacts = []
+    with Mongo_process() as mongo:
+        [contacts.append(mongo.get_doc(contact_id)) for contact_id in vacancy.contacts_ids.split(',')]
     vacancies = alchemy_db.db_session.query(Vacancy).where(Vacancy.user_id == user_id).all()
-    return render_template('vacancy_page.html', vacancy=vacancy, vacancies=vacancies)
-    # return render_template('vacancy_page1.html', vacancy=vacancy, vacancies=vacancies)
+    return render_template('vacancy_page.html', vacancy=vacancy, vacancies=vacancies, contacts=contacts)
+    #return render_template('vacancy_page1.html', vacancy=vacancy, vacancies=vacancies, contacts = contacts)
 
 
 @app.post('/vacancy/<int:vacancy_id>/')
 def update_some_vacancy(vacancy_id):
     form = dict(request.form)
+    vacancy = alchemy_db.db_session.query(Vacancy.contacts_ids, Vacancy.id).filter(Vacancy.id == vacancy_id).first()
+
+    edited_contacts = {"name": form.get("name"), "email": form.get("email"), "phone_number": form.get("phone_number")}
+    contacts=[]
+
+    with Mongo_process() as mongo:
+        mongo.update_doc(vacancy.contacts_ids, edited_contacts )
+        [contacts.append(mongo.get_doc(contact_id)) for contact_id in vacancy.contacts_ids.split(',')]
     alchemy_db.db_session.query(Vacancy).filter(Vacancy.id == vacancy_id).update(
         {Vacancy.position_name: form.get('position_name'),
          Vacancy.company: form.get('company'),
          Vacancy.description: form.get('description'),
-         Vacancy.contacts_ids: form.get('contacts_ids'),
          Vacancy.comment: form.get('comment'),
          Vacancy.status: form.get('status')
          })
     alchemy_db.db_session.commit()
     flash('Інформація по вакансії успішно відредагована', 'OK')
-    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all().first()
-    return render_template('vacancy_page.html', vacancy=vacancy)
+    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).first()
+    return render_template('vacancy_page.html', vacancy=vacancy, contacts=contacts)
 
 
 @app.get('/vacancy/<int:vacancy_id>/events/')
 def get_user_events(vacancy_id):
-    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all().first()
+    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).first()
     events = alchemy_db.db_session.query(Event).where(Event.vacancy_id == vacancy_id).all()
     return render_template('events_page.html', vacancy=vacancy, events=events)
 
@@ -139,7 +157,7 @@ def post_new_event_for_vacancy(vacancy_id):
         alchemy_db.db_session.add(current_event)
         alchemy_db.db_session.commit()
         flash('Інформація успішно додана', 'OK')
-    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all().first()
+    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).first()
     events = alchemy_db.db_session.query(Event).where(Event.vacancy_id == vacancy_id).all()
     return render_template('events_page.html',
                            events=events,
@@ -148,8 +166,8 @@ def post_new_event_for_vacancy(vacancy_id):
 
 @app.get('/vacancy/<int:vacancy_id>/events/<event_id>/')
 def get_event_for_vacancy_by_id(vacancy_id, event_id):
-    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all().first()
-    event = alchemy_db.db_session.query(Event).where(Event.id == event_id).all().first()
+    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).first()
+    event = alchemy_db.db_session.query(Event).where(Event.id == event_id).first()
     return render_template('one_event_page.html', event=event, vacancy=vacancy)
 
 
@@ -164,7 +182,7 @@ def update_some_event_for_vacancy(vacancy_id, event_id):
          })
     alchemy_db.db_session.commit()
     flash('Інформація по подію успішно відредагована', 'OK')
-    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all().first()
+    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).first()
     event = alchemy_db.db_session.query(Event).where(Event.id == event_id).first()
     return render_template('one_event_page.html', event=event, vacancy=vacancy)
 
