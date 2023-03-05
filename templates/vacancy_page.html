@@ -11,7 +11,12 @@
 <li><strong>Компанія:&nbsp;{{vacancy['company']}}</strong></li>
 <li><strong>Дата створення:&nbsp;{{vacancy['creation_date']}}</strong></li>
 <li><strong>Опис:&nbsp;{{vacancy['description']}}</strong></li>
-<li><strong>Контакти:&nbsp;{{vacancy['contacts_ids']}}</strong></li>
+ <p class="contact-info"><b>Контактна інформація</b></p>
+           {% for contact in contacts %}
+          <p class="contact-name"> Ім'я: {{contact['name']}}</p>
+          <p class="contact-email"> Email: {{contact['email']}}</p>
+          <p class="contact-phone"> Номер телефону: {{contact['phone_number']}}</p>
+        {% endfor %}
 <li><strong>Коментар:&nbsp;{{vacancy['comment']}}</strong></li>
 <li><strong>Статус:&nbsp;{{vacancy['status']}}</strong></li>
 </ul>
@@ -51,7 +56,11 @@
 <div style="text-align: center;"><label for="position">&nbsp; &nbsp; &nbsp;Посада: </label> <input id="position" name="position_name" type="text" value="{{vacancy['position_name']}}"/>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</div>
 <div style="text-align: center;"><label for="company">&nbsp; Компанія:</label> <input id="company" name="company" type="text" value="{{vacancy['company']}}"/>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</div>
 <div style="text-align: center;"><label for="description">Опис: </label> <input id="description" name="description" type="text" value="{{vacancy['description']}}"/></div>
-<div style="text-align: center;"><label for="contact_ids">&nbsp;Контакти: </label> <input id="contact_ids" name="contacts_ids" type="text" value="{{vacancy['contacts_ids']}}"/>&nbsp; &nbsp; &nbsp; &nbsp;</div>
+    {% for contact in contacts %}
+<div style="text-align: center;"><label>Ім'я*: </label> <input id="name" name="name" type="text" value="{{contact['name']}}"/></div>
+<div style="text-align: center;"><label>Email*: </label> <input id="email" name="email" type="text" value="{{contact['email']}}"/></div>
+<div style="text-align: center;"><label>Номер телефону*: </label> <input id="phone_number" name="phone_number" type="text" value="{{contact['phone_number']}}"/></div>
+    {% endfor %}
 <div style="text-align: center;"><label for="comment">&nbsp; Коментар: </label> <input id="comment" name="comment" type="text" value="{{vacancy['comment']}}"/>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
 <div style="text-align: center;"><label for="status">&nbsp; Статус: </label> <input id="status" name="status" type="text" value="{{vacancy['status']}}"/>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
 <div style="text-align: center;"><button>Редагувати</button></div>

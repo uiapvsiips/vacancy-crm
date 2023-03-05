@@ -40,8 +40,10 @@
           <textarea id="description" name="description"></textarea><br><br>
           <label for="position_name">Посада:</label>
           <input type="text" id="position_name" name="position_name"><br><br>
-          <label for="contacts_ids">Контакти:</label>
-          <input type="text" id="contacts_ids" name="contacts_ids"><br><br>
+          <label>Контакти:</label>
+          <input type="text" id="name" name="name" placeholder="name"><br><br>
+          <input type="text" id="email" name="email" placeholder="email"><br><br>
+          <input type="text" id="phone_number" name="phone_number" placeholder="number"><br><br>
           <label for="comment">Коментар:</label>
           <input type="text" id="comment" name="comment"><br><br>
           <button type="submit">Додати</button>
@@ -50,9 +52,11 @@
     </div>
 
     <!-- Правая часть (Реклама) -->
+    {%block vacancy%}
     <div class="advertising">
-      <h2>Реклама</h2>
-      <p>Содержимое рекламного блока.</p>
+      <h2>Вакансії</h2>
+      <p>Тут будуть відображатися вакансії</p>
     </div>
+  {%endblock%}
   </body>
 </html>
