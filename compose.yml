@@ -10,7 +10,7 @@ services:
       - db
     environment:
       DB_HOST: db
-      RABBIT_HOST: 
+      RABBIT_HOST:
 
   db:
     image: postgres
