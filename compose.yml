@@ -10,6 +10,7 @@ services:
       - db
     environment:
       DB_HOST: db
+      RABBIT_HOST: 
 
   db:
     image: postgres
@@ -20,3 +21,10 @@ services:
       POSTGRES_DB: postgres
     ports:
       - "5432:5432"
+
+  rabbitmq:
+    image: "rabbitmq:3-management-alpine"
+    ports:
+      - 5672:5672
+      - 15672:15672
+    hostname: 'rabbitmq'

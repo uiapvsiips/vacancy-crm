@@ -73,9 +73,6 @@ class EmailWorker:
         with imaplib.IMAP4_SSL(self.smtp_server) as server:
             server.login(self.login, self.password)
             server.select('INBOX')
-            status, data = server.search(None, 'ALL')
-            # email_ids = list(data[0].split())[::-1]
-
             emails = []
             for email_id in num_messages:
                 status, data = server.fetch(email_id, '(RFC822)')
@@ -85,7 +82,6 @@ class EmailWorker:
                 emails.append(email_message)
                 if len(emails) == 2:
                     break
-
         return emails
 
     def read_emails_pop3(self, num_messages, limit=10):
