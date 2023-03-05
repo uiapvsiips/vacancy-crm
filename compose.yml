@@ -3,6 +3,7 @@ version: '3'
 services:
   web:
     build: .
+    command: ["sh", "-c", "alembic upgrade head && python3 -m flask --app=main.py run --host=0.0.0.0 --port=5000"]
     restart: always
     ports:
       - "5000:5000"
@@ -10,7 +11,14 @@ services:
       - db
     environment:
       DB_HOST: db
-      RABBIT_HOST:
+      RABBIT_HOST: rabbitmq
+
+    celery:
+      build: .
+      restart: always
+      command: celery -A app.celery worker --loglevel=info --purge --pool-solo
+      environment:
+        RABBIT_HOST: rabbitmq
 
   db:
     image: postgres
