@@ -13,12 +13,12 @@ services:
       DB_HOST: db
       RABBIT_HOST: rabbitmq
 
-    celery:
-      build: .
-      restart: always
-      command: celery -A app.celery worker --loglevel=info --purge --pool-solo
-      environment:
-        RABBIT_HOST: rabbitmq
+  celery:
+    build: .
+    restart: always
+    command: celery -A app.celery worker --loglevel=info --purge --pool-solo
+    environment:
+      RABBIT_HOST: rabbitmq
 
   db:
     image: postgres
@@ -36,3 +36,24 @@ services:
       - 5672:5672
       - 15672:15672
     hostname: 'rabbitmq'
+
+  mongo:
+    image: mongo
+    restart: always
+    hostname: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: vacancy
+      MONGO_INITDB_ROOT_PASSWORD: mongopass
+      MONGO_INITDB_DATABASE: mongodb
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: vacancy
+      ME_CONFIG_MONGODB_ADMINPASSWORD: mongopass
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongodb:27017/
