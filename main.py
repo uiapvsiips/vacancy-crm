@@ -44,14 +44,15 @@ def get_user_vacancies_history():
 @app.get('/user/mail/')
 def get_user_mail():
     email_creds = alchemy_db.db_session.query(EmailCredentials).where(EmailCredentials.user_id == user_id).first()
-    with EmailWorker(email_creds.email, email_creds.login, email_creds.password,
-                     email_creds.smtp_server, email_creds.smtp_port,
-                     email_creds.pop3_server, email_creds.pop3_port,
-                     email_creds.imap_server, email_creds.imap_port) as email:
-        if email.pop3_server:
-            emails = email.get_emails([1, 2, 3], protocol='pop3')
-        else:
-            emails = email.get_emails([1, 2, 3], protocol='imap')
+    email = EmailWorker(email_creds.email, email_creds.login, email_creds.password,
+                        email_creds.smtp_server, email_creds.smtp_port,
+                        email_creds.pop_server, email_creds.pop_port,
+                        email_creds.imap_server, email_creds.imap_port)
+    emails = []
+    if email.imap_server:
+        emails = email.get_emails([1, 2, 3], protocol='imap')
+    else:
+        emails = email.get_emails([1, 2, 3], protocol='pop3')
     return render_template('email_page.html', emails=emails)
 
 
@@ -60,14 +61,15 @@ def post_user_mail():
     email_creds = alchemy_db.db_session.query(EmailCredentials).where(EmailCredentials.user_id == user_id).first()
     send_email.apply_async(args=[email_creds, request.form.get('subject'), request.form.get('message'), request.form.get('to')])
     flash('Лист відправлено успішно', 'OK')
-    with EmailWorker(email_creds.email, email_creds.login, email_creds.password,
-                     email_creds.smtp_server, email_creds.smtp_port,
-                     email_creds.pop3_server, email_creds.pop3_port,
-                     email_creds.imap_server, email_creds.imap_port) as email:
-        if email.pop3_server:
-            emails = email.get_emails([1, 2, 3], protocol='pop3')
-        else:
-            emails = email.get_emails([1, 2, 3], protocol='imap')
+    email = EmailWorker(email_creds.email, email_creds.login, email_creds.password,
+                        email_creds.smtp_server, email_creds.smtp_port,
+                        email_creds.pop_server, email_creds.pop_port,
+                        email_creds.imap_server, email_creds.imap_port)
+    emails = []
+    if email.imap_server:
+        emails = email.get_emails([1, 2, 3], protocol='imap')
+    else:
+        emails = email.get_emails([1, 2, 3], protocol='pop3')
     return render_template('email_page.html', emails=emails)
 
 

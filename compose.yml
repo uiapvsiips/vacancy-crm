@@ -16,7 +16,7 @@ services:
   celery:
     build: .
     restart: always
-    command: celery -A app.celery worker --loglevel=info --purge --pool-solo
+    command: celery -A main.celery worker --loglevel=info --purge --pool-solo
     environment:
       RABBIT_HOST: rabbitmq
 
