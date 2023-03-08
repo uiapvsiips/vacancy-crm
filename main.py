@@ -59,7 +59,10 @@ def get_user_mail():
 @app.post('/user/mail/')
 def post_user_mail():
     email_creds = alchemy_db.db_session.query(EmailCredentials).where(EmailCredentials.user_id == user_id).first()
-    send_email.apply_async(args=[email_creds, request.form.get('subject'), request.form.get('message'), request.form.get('to')])
+    creds_dict = alchemy_db.row2dict(email_creds)
+    creds_dict.pop('id')
+    creds_dict.pop('user_id')
+    send_email.apply_async(args=[creds_dict, request.form.get('subject'), request.form.get('message'), request.form.get('to')])
     flash('Лист відправлено успішно', 'OK')
     email = EmailWorker(email_creds.email, email_creds.login, email_creds.password,
                         email_creds.smtp_server, email_creds.smtp_port,

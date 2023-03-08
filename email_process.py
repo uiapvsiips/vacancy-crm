@@ -7,8 +7,8 @@ from email.policy import default
 
 
 class EmailWorker:
-    def __init__(self, user_email, login, password,smtp_server,smtp_port, pop_server,pop_port, imap_server, imap_port):
-        self.user_email = user_email
+    def __init__(self, email, login, password, smtp_server, smtp_port, pop_server, pop_port, imap_server, imap_port):
+        self.user_email = email
         self.login = login
         self.password = password
         self.smtp_server = smtp_server

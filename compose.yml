@@ -16,7 +16,9 @@ services:
   celery:
     build: .
     restart: always
-    command: celery -A main.celery worker --loglevel=info --purge --pool-solo
+    command: celery -A celery_worker worker --loglevel=info --purge --pool solo
+    depends_on:
+      - rabbitmq
     environment:
       RABBIT_HOST: rabbitmq
 
@@ -35,7 +37,7 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
-    hostname: 'rabbitmq'
+    hostname: rabbitmq
 
   mongo:
     image: mongo
