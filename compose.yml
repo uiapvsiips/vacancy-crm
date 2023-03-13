@@ -12,6 +12,7 @@ services:
     environment:
       DB_HOST: db
       RABBIT_HOST: rabbitmq
+      MONGO_HOST: mongodb
 
   celery:
     build: .
@@ -43,6 +44,7 @@ services:
     image: mongo
     restart: always
     hostname: mongodb
+
     ports:
       - "27017:27017"
     environment:
@@ -58,4 +60,4 @@ services:
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: vacancy
       ME_CONFIG_MONGODB_ADMINPASSWORD: mongopass
-      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongodb:27017/
+      ME_CONFIG_MONGODB_URL: mongodb://vacancy:mongopass@mongodb:27017/

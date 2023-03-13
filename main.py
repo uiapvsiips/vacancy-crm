@@ -1,6 +1,7 @@
 from flask import Flask, request, flash, render_template
 from celery_worker import send_email
 import alchemy_db
+from mongo_db import Mongo_process
 from email_process import EmailWorker
 from models import Vacancy, Event, EmailCredentials
 
@@ -38,6 +39,14 @@ def get_user_docs():
 
 @app.route('/vacancy/history/', methods=['GET'])
 def get_user_vacancies_history():
+    return "Get your vacancies history!"
+
+@app.route('/login', methods=['GET'])
+def get_login_page():
+    return "Get your vacancies history!"
+
+@app.route('/login', methods=['POST'])
+def post_login_page():
     return "Get your vacancies history!"
 
 
@@ -79,38 +88,56 @@ def post_user_mail():
 @app.get('/vacancy/')
 def get_user_vacancies():
     vacancies = alchemy_db.db_session.query(Vacancy).where(Vacancy.user_id == user_id).all()
-    # return render_template('vacancy_list.html', vacancies=vacancies)
-    return render_template('vacancy_add.html', vacancies=vacancies)
+    contacts = []
+    with Mongo_process() as mongo:
+        for vacancy in vacancies:
+            [contacts.append(mongo.get_doc(contact_id)) for contact_id in vacancy.contacts_ids.split(',')]
+    return render_template('vacancy_list.html', vacancies=vacancies)
+    #return render_template('vacancy_add.html', vacancies=vacancies)
 
 
 @app.post('/vacancy/')
 def post_new_user_vacancies():
     alchemy_db.init_db()
     form = dict(request.form)
-    if not form['company'] or not form['contacts_ids'] or not form['description'] or not form['position_name']:
+    if not form['company'] or not form['name'] or not form['description'] or not form['position_name']:
         flash('Виникла помилка. Всі поля позначені * повинні бути заповнені!', 'error')
     else:
+        contacts = {"name": form.get("name"), "email": form.get("email"), "phone_number": form.get("phone_number")}
+        contatct_id = None
+        with Mongo_process() as mongo:
+            contatct_id = str(mongo.insert_doc(contacts))
         current_vacancy = Vacancy(form.get('position_name'), form.get('company'), form.get('description'),
-                                  form.get('contacts_ids'), user_id, comment=form.get('comment'))
+                                  contatct_id, user_id, comment=form.get('comment'))
         alchemy_db.db_session.add(current_vacancy)
         alchemy_db.db_session.commit()
         flash('Дані про вакансію успішно додано', 'OK')
-        vacancies = alchemy_db.db_session.query(Vacancy).where(Vacancy.user_id == user_id).all()
-    return render_template('vacancy_add.html',
-                           vacancies=vacancies)
+    vacancies = alchemy_db.db_session.query(Vacancy).where(Vacancy.user_id == user_id).all()
+    return render_template('vacancy_add.html', vacancies=vacancies)
 
 
 @app.get('/vacancy/<int:vacancy_id>/')
 def get_user_vacancy_by_id(vacancy_id):
-    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all().first()
+    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).first()
+    contacts = []
+    with Mongo_process() as mongo:
+        [contacts.append(mongo.get_doc(contact_id)) for contact_id in vacancy.contacts_ids.split(',')]
     vacancies = alchemy_db.db_session.query(Vacancy).where(Vacancy.user_id == user_id).all()
-    return render_template('vacancy_page.html', vacancy=vacancy, vacancies=vacancies)
-    # return render_template('vacancy_page1.html', vacancy=vacancy, vacancies=vacancies)
+    # return render_template('vacancy_page.html', vacancy=vacancy, vacancies=vacancies, contacts = contacts)
+    return render_template('vacancy_page1.html', vacancy=vacancy, vacancies=vacancies, contacts = contacts)
 
 
 @app.post('/vacancy/<int:vacancy_id>/')
 def update_some_vacancy(vacancy_id):
     form = dict(request.form)
+    vacancy = alchemy_db.db_session.query(Vacancy.contacts_ids, Vacancy.id).filter(Vacancy.id == vacancy_id).first()
+
+    edited_contacts = {"name": form.get("name"), "email": form.get("email"), "phone_number": form.get("phone_number")}
+    contacts = []
+
+    with Mongo_process() as mongo:
+        mongo.update_doc(vacancy.contacts_ids, edited_contacts)
+        [contacts.append(mongo.get_doc(contact_id)) for contact_id in vacancy.contacts_ids.split(',')]
     alchemy_db.db_session.query(Vacancy).filter(Vacancy.id == vacancy_id).update(
         {Vacancy.position_name: form.get('position_name'),
          Vacancy.company: form.get('company'),
@@ -121,8 +148,9 @@ def update_some_vacancy(vacancy_id):
          })
     alchemy_db.db_session.commit()
     flash('Інформація по вакансії успішно відредагована', 'OK')
-    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).all().first()
-    return render_template('vacancy_page.html', vacancy=vacancy)
+    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).first()
+    # return render_template('vacancy_page.html', vacancy=vacancy, contacts = contacts)
+    return render_template('vacancy_page1.html', vacancy=vacancy, contacts = contacts)
 
 
 @app.get('/vacancy/<int:vacancy_id>/events/')
