@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Вхід у систему</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles1.css') }}">
+  </head>
+  <body>
+    <form id="login-form" action="" method="post">
+      <h2>Вхід у систему</h2>
+      <label for="login">Логін:</label>
+      <input type="text" id="login" name="login">
+      <label for="password">Пароль:</label>
+      <input type="password" id="password" name="password">
+      <button type="submit">Увійти</button>
+      <div id="reg_button">
+      <button type="submit"><a href="/registration">Зареєструватись</a></button>
+      <div id="forgot-password">
+        <a href="#">Забули пароль?</a>
+      </div>
+    </form>
+  </body>
+</html>

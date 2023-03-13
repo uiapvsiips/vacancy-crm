@@ -41,9 +41,17 @@ def get_user_docs():
 def get_user_vacancies_history():
     return "Get your vacancies history!"
 
+@app.route('/registration', methods=['GET'])
+def get_reg_page():
+    return render_template('reg_page.html')
+
+@app.route('/registration', methods=['POST'])
+def post_reg_page():
+    return "Get your vacancies history!"
+
 @app.route('/login', methods=['GET'])
 def get_login_page():
-    return "Get your vacancies history!"
+    return render_template('login_page.html')
 
 @app.route('/login', methods=['POST'])
 def post_login_page():
