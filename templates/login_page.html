@@ -9,12 +9,13 @@
     <form id="login-form" action="" method="post">
       <h2>Вхід у систему</h2>
       <label for="login">Логін:</label>
-      <input type="text" id="login" name="login">
+      <input type="text" id="login" name="login" required>
       <label for="password">Пароль:</label>
-      <input type="password" id="password" name="password">
+      <input type="password" id="password" name="password" required>
       <button type="submit">Увійти</button>
       <div id="reg_button">
       <button type="submit"><a href="/registration">Зареєструватись</a></button>
+      </div>
       <div id="forgot-password">
         <a href="#">Забули пароль?</a>
       </div>

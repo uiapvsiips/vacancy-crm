@@ -1,9 +1,9 @@
-from flask import Flask, request, flash, render_template
+from flask import Flask, request, flash, render_template, redirect, url_for, session
 from celery_worker import send_email
 import alchemy_db
 from mongo_db import Mongo_process
 from email_process import EmailWorker
-from models import Vacancy, Event, EmailCredentials
+from models import Vacancy, Event, EmailCredentials, User
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
@@ -55,8 +55,14 @@ def get_login_page():
 
 @app.route('/login', methods=['POST'])
 def post_login_page():
-    return "Get your vacancies history!"
-
+    form = request.form
+    login = form.get('login')
+    password = form.get('password')
+    user = alchemy_db.db_session.query(User).filter(User.email==login).first()
+    if user is None:
+        return redirect(url_for('get_login_page'))
+    session['user_id'] = user.id
+    return redirect(url_for('main_page'))
 
 @app.get('/user/mail/')
 def get_user_mail():
