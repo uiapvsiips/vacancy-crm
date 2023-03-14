@@ -15,11 +15,10 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 @app.route('/', methods=['GET'])
 @app.route('/user/', methods=['GET'])
 def main_page():
-    user_id = session.get('user_id', None)
-    if user_id:
-        user = alchemy_db.db_session.query(User).filter(User.id==user_id).first()
-        return f"Hello, {user.name}. This is your dashboard!"
-    return redirect(url_for('get_login_page'))
+    user = get_current_user()
+    if user is None:
+        return redirect(url_for('get_login_page'))
+    return f"Hello, {user.name}. This is your dashboard!"
 
 
 @app.route('/user/calendar/', methods=['GET'])
@@ -55,13 +54,20 @@ def post_reg_page():
     form = request.form
     name = form.get('name')
     email = form.get('email')
-    password = generate_password_hash(form.get('password'), method='sha256')
+    password = form.get('password')
+    confirm_password = form.get('confirm_password')
+    if password!=confirm_password:
+        flash('Паролі повинні співпадати')
+        return redirect(url_for('post_reg_page'))
     if not alchemy_db.db_session.query(User).filter(User.email==email).first():
-        new_user = User(name, email, password)
+        new_user = User(name, email, generate_password_hash(password, method='sha256'))
         alchemy_db.db_session.add(new_user)
         alchemy_db.db_session.commit()
         session['user_id'] = new_user.id
         return redirect(url_for('main_page'))
+    else:
+        flash("Користувач з таким email вже існує")
+        return redirect(url_for('post_reg_page'))
 
 
 
@@ -76,13 +82,12 @@ def post_login_page():
     login = form.get('login')
     password = form.get('password')
     user = alchemy_db.db_session.query(User).filter(User.email==login).first()
-    if user is None:
+    if user is None or not check_password_hash(user.password, password):
+        flash('Невірний логін або пароль!')
         return redirect(url_for('get_login_page'))
-    if check_password_hash(user.password, password):
+    else:
         session['user_id'] = user.id
         return redirect(url_for('main_page'))
-    else:
-        flash('Incorrect login or password!')
 
 @app.get('/user/mail/')
 def get_user_mail():

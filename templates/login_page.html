@@ -12,6 +12,16 @@
       <input type="text" id="login" name="login" required>
       <label for="password">Пароль:</label>
       <input type="password" id="password" name="password" required>
+      {% with messages = get_flashed_messages() %}
+		 	{% if messages %}
+		 	<div class="messages">
+		 	    {%- for msg in messages %}
+				<p>{{ msg }}</p>
+		 	    {% endfor -%}
+		 	</div>
+		 	<hr />
+		 	{% endif %}
+		 	{% endwith %}
       <button type="submit">Увійти</button>
       <div id="reg_button">
       <button type="submit"><a href="/registration">Зареєструватись</a></button>

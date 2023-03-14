@@ -233,6 +233,10 @@
         text-decoration: inherit;
         color: #ffffff
 }
+#login-form .messages,
+#reg-form .messages {
+color: #ed1616;
+}
 #forgot-password {
         text-align: center;
         margin-top: 10px;

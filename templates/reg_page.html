@@ -5,6 +5,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="{{ url_for('static', filename='styles1.css') }}">
+	<script src="{{ url_for('static', filename='JSMethods.js') }}"></script>
 </head>
 <body>
 	<form id="reg-form" action="" method="post">
@@ -15,6 +16,18 @@
 		<input type="email" id="email" name="email" required>
 		<label for="password">Пароль:</label>
 		<input type="password" id="password" name="password" required>
+		<label for="confirm_password">Повторіть пароль:</label>
+		<input type="password" id="confirm_password" name="confirm_password" required>
+		 {% with messages = get_flashed_messages() %}
+		 	{% if messages %}
+		 	<div class="messages">
+		 	    {%- for msg in messages %}
+				<p>{{ msg }}</p>
+		 	    {% endfor -%}
+		 	</div>
+		 	<hr />
+		 	{% endif %}
+		 	{% endwith %}
 		<input type="submit" value="Зареєструватись">
 	</form>
 </body>
