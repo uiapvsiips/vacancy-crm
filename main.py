@@ -1,20 +1,25 @@
 from flask import Flask, request, flash, render_template, redirect, url_for, session
+
+import db_processing
 from celery_worker import send_email
 import alchemy_db
 from mongo_db import Mongo_process
 from email_process import EmailWorker
 from models import Vacancy, Event, EmailCredentials, User
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
-# TODO delete user_id variable after doing user authorization
-user_id = 1
 
 
 @app.route('/', methods=['GET'])
 @app.route('/user/', methods=['GET'])
 def main_page():
-    return "Hello, User. This is your dashboard!"
+    user_id = session.get('user_id', None)
+    if user_id:
+        user = alchemy_db.db_session.query(User).filter(User.id==user_id).first()
+        return f"Hello, {user.name}. This is your dashboard!"
+    return redirect(url_for('get_login_page'))
 
 
 @app.route('/user/calendar/', methods=['GET'])
@@ -47,7 +52,19 @@ def get_reg_page():
 
 @app.route('/registration', methods=['POST'])
 def post_reg_page():
-    return "Get your vacancies history!"
+    form = request.form
+    name = form.get('name')
+    email = form.get('email')
+    password = generate_password_hash(form.get('password'), method='sha256')
+    if not alchemy_db.db_session.query(User).filter(User.email==email).first():
+        new_user = User(name, email, password)
+        alchemy_db.db_session.add(new_user)
+        alchemy_db.db_session.commit()
+        session['user_id'] = new_user.id
+        return redirect(url_for('main_page'))
+
+
+
 
 @app.route('/login', methods=['GET'])
 def get_login_page():
@@ -61,12 +78,18 @@ def post_login_page():
     user = alchemy_db.db_session.query(User).filter(User.email==login).first()
     if user is None:
         return redirect(url_for('get_login_page'))
-    session['user_id'] = user.id
-    return redirect(url_for('main_page'))
+    if check_password_hash(user.password, password):
+        session['user_id'] = user.id
+        return redirect(url_for('main_page'))
+    else:
+        flash('Incorrect login or password!')
 
 @app.get('/user/mail/')
 def get_user_mail():
-    email_creds = alchemy_db.db_session.query(EmailCredentials).where(EmailCredentials.user_id == user_id).first()
+    user = get_current_user()
+    if user is None:
+        return redirect(url_for('get_login_page'))
+    email_creds = alchemy_db.db_session.query(EmailCredentials).where(EmailCredentials.user_id == user.id).first()
     email = EmailWorker(email_creds.email, email_creds.login, email_creds.password,
                         email_creds.smtp_server, email_creds.smtp_port,
                         email_creds.pop_server, email_creds.pop_port,
@@ -81,7 +104,10 @@ def get_user_mail():
 
 @app.post('/user/mail/')
 def post_user_mail():
-    email_creds = alchemy_db.db_session.query(EmailCredentials).where(EmailCredentials.user_id == user_id).first()
+    user = get_current_user()
+    if user is None:
+        return redirect(url_for('get_login_page'))
+    email_creds = alchemy_db.db_session.query(EmailCredentials).where(EmailCredentials.user_id == user.id).first()
     creds_dict = alchemy_db.row2dict(email_creds)
     creds_dict.pop('id')
     creds_dict.pop('user_id')
@@ -101,7 +127,10 @@ def post_user_mail():
 
 @app.get('/vacancy/')
 def get_user_vacancies():
-    vacancies = alchemy_db.db_session.query(Vacancy).where(Vacancy.user_id == user_id).all()
+    user = get_current_user()
+    if user is None:
+        return redirect(url_for('get_login_page'))
+    vacancies = alchemy_db.db_session.query(Vacancy).where(Vacancy.user_id == user.id).all()
     contacts = []
     with Mongo_process() as mongo:
         for vacancy in vacancies:
@@ -112,6 +141,9 @@ def get_user_vacancies():
 
 @app.post('/vacancy/')
 def post_new_user_vacancies():
+    user = get_current_user()
+    if user is None:
+        return redirect(url_for('get_login_page'))
     alchemy_db.init_db()
     form = dict(request.form)
     if not form['company'] or not form['name'] or not form['description'] or not form['position_name']:
@@ -122,22 +154,26 @@ def post_new_user_vacancies():
         with Mongo_process() as mongo:
             contatct_id = str(mongo.insert_doc(contacts))
         current_vacancy = Vacancy(form.get('position_name'), form.get('company'), form.get('description'),
-                                  contatct_id, user_id, comment=form.get('comment'))
+                                  contatct_id, user.id, comment=form.get('comment'))
         alchemy_db.db_session.add(current_vacancy)
         alchemy_db.db_session.commit()
         flash('Дані про вакансію успішно додано', 'OK')
-    vacancies = alchemy_db.db_session.query(Vacancy).where(Vacancy.user_id == user_id).all()
-    return render_template('vacancy_add.html', vacancies=vacancies)
+    vacancies = alchemy_db.db_session.query(Vacancy).where(Vacancy.user_id == user.id).all()
+    return render_template('vacancy_list.html', vacancies=vacancies)
 
 
 @app.get('/vacancy/<int:vacancy_id>/')
 def get_user_vacancy_by_id(vacancy_id):
-    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id).first()
+    user = get_current_user()
+    if user is None:
+        return redirect(url_for('get_login_page'))
+    vacancy = alchemy_db.db_session.query(Vacancy).where(Vacancy.id == vacancy_id, Vacancy.user_id==user.id).first()
+    if vacancy is None:
+        return redirect(url_for('get_user_vacancies'))
     contacts = []
     with Mongo_process() as mongo:
         [contacts.append(mongo.get_doc(contact_id)) for contact_id in vacancy.contacts_ids.split(',')]
-    vacancies = alchemy_db.db_session.query(Vacancy).where(Vacancy.user_id == user_id).all()
-    # return render_template('vacancy_page.html', vacancy=vacancy, vacancies=vacancies, contacts = contacts)
+    vacancies = alchemy_db.db_session.query(Vacancy).where(Vacancy.user_id == user.id).all()
     return render_template('vacancy_page1.html', vacancy=vacancy, vacancies=vacancies, contacts = contacts)
 
 
@@ -215,5 +251,10 @@ def update_some_event_for_vacancy(vacancy_id, event_id):
     event = alchemy_db.db_session.query(Event).where(Event.id == event_id).first()
     return render_template('one_event_page.html', event=event, vacancy=vacancy)
 
+def get_current_user():
+    user_id = session.get('user_id', None)
+    if not user_id:
+        return None
+    return alchemy_db.db_session.query(User).filter(User.id==user_id).first()
 
 app.run(debug=True)
