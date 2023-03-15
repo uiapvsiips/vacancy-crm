@@ -16,13 +16,14 @@
           </div>
         <div class="links">
           <ul>
-            <li><a href="/user/">Користувач</a></li>
-            <li><a href="/vacancy/">Вакансії</a></li>
-            <li><a href="/loguot/">Вийти</a></li>
+            <li><a href="/user">Користувач</a></li>
+            <li><a href="/vacancy">Вакансії</a></li>
+            <li><a href="/logout">Вийти</a></li>
           </ul>
         </div>
       </div>
 
+    {%block main%}
     <div class="job-list">
       <h2>Список вакансій</h2>
       <ul>
@@ -50,7 +51,7 @@
         </form>
       </div>
     </div>
-
+    {%endblock%}
     {%block vacancy%}
     <div class="advertising">
       <h2>Вакансії</h2>

@@ -17,7 +17,7 @@ def main_page():
     user_id = session.get('user_id', None)
     if user_id is None:
         return redirect(url_for('get_login_page'))
-    return f"Hello, {session.get('user_name', None)}. This is your dashboard!"
+    return render_template('user_page.html', user_name = session.get('user_name'))
 
 
 @app.route('/user/calendar/', methods=['GET'])
@@ -90,7 +90,7 @@ def post_reg_page():
 @app.get('/logout')
 def logout():
     session.clear()
-    return render_template('login_page.html')
+    return redirect(url_for('get_login_page'))
 
 
 @app.get('/login')
