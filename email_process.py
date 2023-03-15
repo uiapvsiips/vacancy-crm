@@ -22,18 +22,18 @@ class EmailWorker:
 
     def __enter__(self):
         self.connect()
+
     def __exit__(self, exc_type, exc_value, traceback):
         self.disconnect()
-
 
     def connect(self, protocol):
         if protocol == 'smtp':
             self.smtp_connection = smtplib.SMTP_SSL(self.smtp_server, self.smtp_port)
             self.smtp_connection.login(self.login, self.password)
         else:
-            if protocol=='pop':
+            if protocol == 'pop':
                 self.imap_pop_connection = poplib.POP3_SSL(self.pop_server, self.pop_port)
-            elif protocol=='imap':
+            elif protocol == 'imap':
                 self.imap_pop_connection = imaplib.IMAP4_SSL(self.imap_server, self.imap_port)
             self.imap_pop_connection.login(self.login, self.password)
 
@@ -61,9 +61,9 @@ class EmailWorker:
 
     def get_emails(self, num_messages, protocol):
         if protocol == 'pop3':
-             return self.read_emails_pop3(num_messages)
+            return self.read_emails_pop3(num_messages)
         elif protocol == 'imap':
-             return self.read_emails_imap(num_messages)
+            return self.read_emails_imap(num_messages)
         else:
             raise ValueError('Unknown protocol')
 
@@ -80,7 +80,7 @@ class EmailWorker:
                     emails.append(email_message)
         return emails
 
-    def read_emails_pop3(self, num_messages, limit=10):
+    def read_emails_pop3(self, num_messages):
         self.imap_pop_connection = poplib.POP3_SSL(self.pop_server, self.pop_port)
         self.imap_pop_connection.user(self.login)
         self.imap_pop_connection.pass_(self.password)

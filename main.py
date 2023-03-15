@@ -164,7 +164,6 @@ def get_user_vacancies():
         for vacancy in vacancies:
             [contacts.append(mongo.get_doc(contact_id)) for contact_id in vacancy.contacts_ids.split(',')]
     return render_template('vacancy_list.html', vacancies=vacancies)
-    # return render_template('vacancy_add.html', vacancies=vacancies)
 
 
 @app.post('/vacancy/')

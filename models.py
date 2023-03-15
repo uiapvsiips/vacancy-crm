@@ -1,5 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, func, Text, text
+
 from alchemy_db import Base
+
 
 class User(Base):
     __tablename__ = 'user'
@@ -12,6 +14,7 @@ class User(Base):
         self.name = name
         self.email = email
         self.password = password
+
 
 class EmailCredentials(Base):
     __tablename__ = 'email_creds'
@@ -26,7 +29,6 @@ class EmailCredentials(Base):
     pop_port = Column(Integer)
     imap_server = Column(String(120))
     imap_port = Column(Integer)
-
 
     def __init__(self, login, password, email, smtp_server, smtp_port, pop_server, pop_port, imap_server, imap_port):
         self.login = login
@@ -52,7 +54,7 @@ class Vacancy(Base):
     comment = Column(String(120))
     user_id = Column(Integer, ForeignKey('user.id'))
 
-    def __init__(self, postion_name, company, description, contacts_ids, user_id, status = 0, comment=None):
+    def __init__(self, postion_name, company, description, contacts_ids, user_id, status=0, comment=None):
         self.position_name = postion_name
         self.company = company
         self.description = description
@@ -61,10 +63,11 @@ class Vacancy(Base):
         self.status = status
         self.user_id = user_id
 
+
 class Event(Base):
     __tablename__ = 'event'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    vacancy_id = Column(Integer,ForeignKey('vacancy.id'), nullable=False)
+    vacancy_id = Column(Integer, ForeignKey('vacancy.id'), nullable=False)
     description = Column(String(1000), nullable=False)
     event_date = Column(String(20), nullable=False, server_default=func.now())
     title = Column(String(120), nullable=False)
